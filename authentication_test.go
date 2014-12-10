@@ -1,52 +1,54 @@
 package clcgo
 
 import "testing"
+import "fmt"
+
+type handlerCallback func(string, authParameters) string
 
 type testRequestor struct {
-	Calls []call
+	Handlers map[string]handlerCallback
 }
 
 func newTestRequestor() testRequestor {
-	return testRequestor{Calls: make([]call, 0)}
+	return testRequestor{Handlers: make(map[string]handlerCallback)}
 }
 
-type call struct {
-	URL        string
-	Parameters authParameters
+// TODO: And a count for verification
+func (r *testRequestor) registerHandler(url string, callback handlerCallback) {
+	r.Handlers[url] = callback
 }
 
 func (r *testRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
-	parameters := v.(authParameters)
-	r.Calls = append(r.Calls, call{url, parameters})
-
-	return []byte(`{"bearerToken":"expected token"}`), nil
+	callback, found := r.Handlers[url]
+	if found {
+		// TODO error checking on coercion and make this more flexible
+		response := callback(url, v.(authParameters))
+		return []byte(response), nil
+	} else {
+		return nil, fmt.Errorf("There is no handler for the URL '%s'", url)
+	}
 }
 
 // TODO: Handles bad response codes for explosions and bad passwords
 
 func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 	r := newTestRequestor()
+
+	r.registerHandler(AuthenticationURL, func(url string, parameters authParameters) string {
+		if parameters.Username != "username" {
+			t.Errorf("Expected Username to be username, got '%s'", parameters.Username)
+		}
+
+		if parameters.Password != "password" {
+			t.Errorf("Expected Password to be password, got '%s'", parameters.Password)
+		}
+
+		return `{"bearerToken":"expected token"}`
+	})
+
 	credentials, err := fetchCredentials(&r, "username", "password")
 	if err != nil {
-		t.Errorf("Expected no error, got %s", err.Error)
-	}
-
-	if len(r.Calls) != 1 {
-		t.Errorf("Expected PostJSON called once, callse %d times", len(r.Calls))
-	}
-
-	c := r.Calls[0]
-
-	if c.URL != AuthenticationURL {
-		t.Errorf("Expected call to '%s', got '%s'", AuthenticationURL, c.URL)
-	}
-
-	if c.Parameters.Username != "username" {
-		t.Errorf("Expected Username to be username, got '%s'", c.Parameters.Username)
-	}
-
-	if c.Parameters.Password != "password" {
-		t.Errorf("Expected Password to be password, got '%s'", c.Parameters.Password)
+		t.Errorf("Expected no error, got '%s'", err)
 	}
 
 	if credentials.BearerToken != "expected token" {
