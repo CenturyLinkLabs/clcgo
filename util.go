@@ -13,10 +13,23 @@ type Requestor interface {
 
 type CLCRequestor struct{}
 
-func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
-	json, _ := json.Marshal(v)
+type RequestError struct {
+	Err        string
+	StatusCode int
+}
 
-	client := &http.Client{}
+func (r RequestError) Error() string {
+	return r.Err
+}
+
+func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
+	json, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+
 	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
 	if err != nil {
 		return nil, err
@@ -30,12 +43,14 @@ func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	// TODO: Check for unexpected response codes
-
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
 	}
 
 	return body, nil
