@@ -2,6 +2,7 @@ package clcgo
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 type Requestor interface {
 	PostJSON(url string, v interface{}) ([]byte, error)
+	GetJSON(url string) ([]byte, error)
 }
 
 type CLCRequestor struct{}
@@ -54,4 +56,8 @@ func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func (r *CLCRequestor) GetJSON(url string) ([]byte, error) {
+	return nil, errors.New("NOT IMPLEMENTED")
 }
