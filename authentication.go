@@ -1,6 +1,9 @@
 package clcgo
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
 
 type Credentials struct {
 	BearerToken string
@@ -22,10 +25,14 @@ func fetchCredentials(client Requestor, username string, password string) (Crede
 	response, err := client.PostJSON(AuthenticationURL, c)
 
 	if err != nil {
+		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
+			err = errors.New("There was a problem with your credentials")
+		}
+
 		return Credentials{}, err
-	} else {
-		var credentials Credentials
-		json.Unmarshal(response, &credentials)
-		return credentials, nil
 	}
+
+	var credentials Credentials
+	json.Unmarshal(response, &credentials)
+	return credentials, nil
 }
