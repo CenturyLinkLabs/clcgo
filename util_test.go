@@ -14,18 +14,28 @@ type testParameters struct {
 	TestKey string
 }
 
-func TestSuccessfulPostJSON(t *testing.T) {
-	laddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:35729")
+func startServer(uri string, handler func(w http.ResponseWriter, r *http.Request)) (string, *net.TCPListener) {
+	laddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:31981")
 	if nil != err {
-		t.Fatalf("Couldn't start server")
+		panic("Couldn't start server")
 	}
 	listener, err := net.ListenTCP("tcp", laddr)
 	if nil != err {
-		t.Fatalf("Couldn't start server")
+		panic("Couldn't start server")
 	}
 
 	h := http.NewServeMux()
-	h.HandleFunc("/example", func(w http.ResponseWriter, r *http.Request) {
+
+	h.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
+		handler(w, r)
+	})
+
+	go http.Serve(listener, h)
+	return "http://127.0.0.1:31981", listener
+}
+
+func TestSuccessfulPostJSON(t *testing.T) {
+	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Response Text")
 
 		if r.Method != "POST" {
@@ -51,12 +61,10 @@ func TestSuccessfulPostJSON(t *testing.T) {
 			t.Errorf("Expected '%s' and '%s' to match", e, p)
 		}
 	})
-
-	go http.Serve(listener, h)
-	defer listener.Close()
+	defer l.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON("http://127.0.0.1:35729/example", testParameters{"Testing"})
+	response, err := r.PostJSON(root+"/example", testParameters{"Testing"})
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
@@ -68,25 +76,13 @@ func TestSuccessfulPostJSON(t *testing.T) {
 }
 
 func TestUnhandledStatusOnPostJSON(t *testing.T) {
-	laddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:35729")
-	if nil != err {
-		t.Fatalf("Couldn't start server")
-	}
-	listener, err := net.ListenTCP("tcp", laddr)
-	if nil != err {
-		t.Fatalf("Couldn't start server")
-	}
-
-	h := http.NewServeMux()
-	h.HandleFunc("/example", func(w http.ResponseWriter, r *http.Request) {
+	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", 400)
 	})
-
-	go http.Serve(listener, h)
-	defer listener.Close()
+	defer l.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON("http://127.0.0.1:35729/example", testParameters{"Testing"})
+	response, err := r.PostJSON(root+"/example", testParameters{"Testing"})
 	if a := strings.TrimSpace(string(response)); a != "Bad Request" {
 		t.Errorf("Expected response 'Bad Request', got '%s'", a)
 	}
