@@ -5,7 +5,8 @@ import (
 )
 
 func TestWorkingServerURL(t *testing.T) {
-	s := Server{ID: "abc123", AccountAlias: "AA"}
+	s := Server{ID: "abc123"}
+	s.SetCredentials(Credentials{AccountAlias: "AA"})
 	u, err := s.URL()
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
@@ -21,7 +22,7 @@ func TestErroredServerURL(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected an error, got nothing")
 	} else {
-		if e := "The server needs an AccountAlias and ID attribute to generate a URL"; err.Error() != e {
+		if e := "The server needs an ID attribute to generate a URL"; err.Error() != e {
 			t.Errorf("Expected the error '%s', got nothing", e)
 		}
 	}

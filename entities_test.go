@@ -19,17 +19,18 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	id := "abc123"
 	url := fmt.Sprintf(ServerURL, "AA", id)
+	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 
 	r.registerGetHandler(url, func(token string, url string) (string, error) {
-		if e := "beartoken"; token != e {
+		if e := "token"; token != e {
 			t.Errorf("Expected token '%s', got '%s'", e, token)
 		}
 		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
 	})
 
-	s := Server{ID: id, AccountAlias: "AA"}
+	s := Server{ID: id}
 	//TODO audit ALL the pointer receivers
-	err := getEntity(&r, "beartoken", &s)
+	err := getEntity(&r, c, &s)
 
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
@@ -43,7 +44,8 @@ func TestSuccessfulGetEntity(t *testing.T) {
 func TestErroredURLInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	s := Server{}
-	err := getEntity(&r, "beartoken", &s)
+	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
+	err := getEntity(&r, c, &s)
 
 	_, e := s.URL()
 	if err.Error() != e.Error() {
@@ -54,8 +56,9 @@ func TestErroredURLInGetEntity(t *testing.T) {
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	id := "abc123"
-	s := Server{ID: id, AccountAlias: "AA"}
-	err := getEntity(&r, "beartoken", &s)
+	s := Server{ID: id}
+	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
+	err := getEntity(&r, c, &s)
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
 	if e := fmt.Sprintf("There is no handler for the URL '%s'", url); err.Error() != e {
@@ -72,8 +75,9 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 		return ``, nil
 	})
 
-	s := Server{ID: id, AccountAlias: "AA"}
-	err := getEntity(&r, "beartoken", &s)
+	s := Server{ID: id}
+	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
+	err := getEntity(&r, c, &s)
 
 	if e := "unexpected end of JSON input"; err.Error() != e {
 		t.Errorf("Expected the error '%s', got '%s'", e, err)

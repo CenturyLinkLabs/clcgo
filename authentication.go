@@ -6,7 +6,8 @@ import (
 )
 
 type Credentials struct {
-	BearerToken string
+	BearerToken  string
+	AccountAlias string
 }
 
 type authParameters struct {
