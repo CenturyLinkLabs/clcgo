@@ -15,7 +15,7 @@ type DataCenter struct {
 	Name string
 }
 
-const DataCentersURL = ApiRoot + "/datacenters/%s"
+const DataCentersURL = APIRoot + "/datacenters/%s"
 
 func (d DataCenters) URL(a string) (string, error) {
 	return fmt.Sprintf(DataCentersURL, a), nil

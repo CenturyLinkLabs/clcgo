@@ -10,7 +10,7 @@ func TestWorkingDataCentersURL(t *testing.T) {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
 
-	if e := ApiRoot + "/datacenters/AA"; u != e {
+	if e := APIRoot + "/datacenters/AA"; u != e {
 		t.Errorf("Expected URL to be '%s', was '%s'", e, u)
 	}
 }
@@ -25,7 +25,7 @@ func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
 
-	if e := ApiRoot + "/datacenters/AA/abc123/deploymentCapabilities"; u != e {
+	if e := APIRoot + "/datacenters/AA/abc123/deploymentCapabilities"; u != e {
 		t.Errorf("Expected URL to be '%s', was '%s'", e, u)
 	}
 }

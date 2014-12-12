@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-const ServerURL = ApiRoot + "/servers/%s/%s"
+const ServerURL = APIRoot + "/servers/%s/%s"
 
 type Server struct {
 	ID   string

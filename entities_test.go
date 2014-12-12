@@ -10,9 +10,9 @@ func (r testRequestor) GetJSON(t string, url string) ([]byte, error) {
 	if found {
 		s, err := callback(t, url)
 		return []byte(s), err
-	} else {
-		return nil, fmt.Errorf("There is no handler for the URL '%s'", url)
 	}
+
+	return nil, fmt.Errorf("There is no handler for the URL '%s'", url)
 }
 
 func TestSuccessfulGetEntity(t *testing.T) {

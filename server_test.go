@@ -10,7 +10,7 @@ func TestWorkingServerURL(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
-	if e := ApiRoot + "/servers/AA/abc123"; u != e {
+	if e := APIRoot + "/servers/AA/abc123"; u != e {
 		t.Errorf("Expected URL to be '%s', was '%s'", e, u)
 	}
 }

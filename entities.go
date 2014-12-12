@@ -5,7 +5,7 @@ type Entity interface {
 	Unmarshal([]byte) error
 }
 
-const ApiRoot = "https://api.tier3.com/v2"
+const APIRoot = "https://api.tier3.com/v2"
 
 func GetEntity(c Credentials, e Entity) error {
 	return getEntity(&CLCRequestor{}, c, e)
