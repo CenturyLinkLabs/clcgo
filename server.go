@@ -1,26 +1,41 @@
 package clcgo
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
 
-const ServerURL = ApiRoot + "/servers/%s"
+const ServerURL = "servers/%s/%s"
+
+type ServerService struct {
+	client *Client
+}
 
 type Server struct {
-	ID   string
-	Name string
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	LocationID string `json:"locationId"`
 }
 
-func (s Server) URL() (string, error) {
-	if s.ID == "" {
-		return "", errors.New("The server needs an ID attribute to generate a URL")
+func (s *ServerService) Get(id string) (*Server, error) {
+
+	if id == "" {
+		return nil, errors.New("The server needs an ID attribute to generate a URL")
 	}
 
-	return fmt.Sprintf(ServerURL, s.ID), nil
-}
+	url := fmt.Sprintf(ServerURL, s.client.user.AccountAlias, id)
+	req, err := s.client.newRequest("GET", url, nil)
 
-func (s *Server) Unmarshal(j []byte) error {
-	return json.Unmarshal(j, s)
+	if err != nil {
+		return nil, err
+	}
+
+	server := &Server{}
+	err = s.client.executeRequest(req, server)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return server, err
 }
