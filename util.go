@@ -24,14 +24,14 @@ func (r RequestError) Error() string {
 	return r.Err
 }
 
-func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
+func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 	json, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: DisableKeepAlives is pretty much just for tests...
-	client := &http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+	client := http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
 	if err != nil {
@@ -59,9 +59,9 @@ func (r *CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 	return body, nil
 }
 
-func (r *CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
+func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
 	// TODO: DisableKeepAlives is pretty much just for tests...
-	client := &http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+	client := http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

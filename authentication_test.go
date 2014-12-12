@@ -28,7 +28,7 @@ func (r *testRequestor) registerGetHandler(url string, callback getHandlerCallba
 	r.GetHandlers[url] = callback
 }
 
-func (r *testRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
+func (r testRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 	callback, found := r.Handlers[url]
 	if found {
 		// TODO error checking on coercion and make this more flexible

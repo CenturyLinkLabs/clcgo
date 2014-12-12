@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func (r *testRequestor) GetJSON(t string, url string) ([]byte, error) {
+func (r testRequestor) GetJSON(t string, url string) ([]byte, error) {
 	callback, found := r.GetHandlers[url]
 	if found {
 		s, err := callback(t, url)
@@ -29,7 +29,6 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	})
 
 	s := Server{ID: id}
-	//TODO audit ALL the pointer receivers
 	err := getEntity(&r, c, &s)
 
 	if err != nil {
