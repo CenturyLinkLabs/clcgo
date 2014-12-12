@@ -46,7 +46,7 @@ func TestErroredURLInGetEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	err := getEntity(&r, c, &s)
 
-	_, e := s.URL()
+	_, e := s.URL("abc123")
 	if err.Error() != e.Error() {
 		t.Errorf("Expected the error '%s', got '%s'", e, err)
 	}

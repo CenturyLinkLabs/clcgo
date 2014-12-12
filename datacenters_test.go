@@ -4,8 +4,7 @@ import "testing"
 
 func TestWorkingDataCentersURL(t *testing.T) {
 	d := DataCenters{}
-	d.SetCredentials(Credentials{AccountAlias: "AA"})
-	u, err := d.URL()
+	u, err := d.URL("AA")
 
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
@@ -20,8 +19,7 @@ func TestWorkingDataCentersURL(t *testing.T) {
 
 func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{DataCenter: DataCenter{ID: "abc123"}}
-	d.SetCredentials(Credentials{AccountAlias: "AA"})
-	u, err := d.URL()
+	u, err := d.URL("AA")
 
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
@@ -34,8 +32,7 @@ func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
 
 func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{}
-	d.SetCredentials(Credentials{AccountAlias: "AA"})
-	_, err := d.URL()
+	_, err := d.URL("AA")
 
 	if e := "Need a DataCenter with an ID"; err == nil || err.Error() != e {
 		t.Errorf("Expected the error '%s', got '%v'", e, err)

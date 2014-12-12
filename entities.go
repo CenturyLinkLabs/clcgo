@@ -1,8 +1,7 @@
 package clcgo
 
 type Entity interface {
-	SetCredentials(Credentials)
-	URL() (string, error)
+	URL(string) (string, error)
 	Unmarshal([]byte) error
 }
 
@@ -13,8 +12,7 @@ func GetEntity(c Credentials, e Entity) error {
 }
 
 func getEntity(r Requestor, c Credentials, e Entity) error {
-	e.SetCredentials(c)
-	url, err := e.URL()
+	url, err := e.URL(c.AccountAlias)
 	if err != nil {
 		return err
 	}

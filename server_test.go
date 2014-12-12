@@ -6,8 +6,7 @@ import (
 
 func TestWorkingServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
-	s.SetCredentials(Credentials{AccountAlias: "AA"})
-	u, err := s.URL()
+	u, err := s.URL("AA")
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
@@ -18,7 +17,7 @@ func TestWorkingServerURL(t *testing.T) {
 
 func TestErroredServerURL(t *testing.T) {
 	s := Server{}
-	u, err := s.URL()
+	u, err := s.URL("AA")
 	if err == nil {
 		t.Errorf("Expected an error, got nothing")
 	} else {
