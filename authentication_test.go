@@ -3,19 +3,29 @@ package clcgo
 import "testing"
 import "fmt"
 
+type getHandlerCallback func(string, string) (string, error)
 type handlerCallback func(string, authParameters) (string, error)
 
+//TODO NEED TO MOVE THIS SOMEWHERES
 type testRequestor struct {
-	Handlers map[string]handlerCallback
+	GetHandlers map[string]getHandlerCallback
+	Handlers    map[string]handlerCallback
 }
 
 func newTestRequestor() testRequestor {
-	return testRequestor{Handlers: make(map[string]handlerCallback)}
+	return testRequestor{
+		Handlers:    make(map[string]handlerCallback),
+		GetHandlers: make(map[string]getHandlerCallback),
+	}
 }
 
 // TODO: And a count for verification
 func (r *testRequestor) registerHandler(url string, callback handlerCallback) {
 	r.Handlers[url] = callback
+}
+
+func (r *testRequestor) registerGetHandler(url string, callback getHandlerCallback) {
+	r.GetHandlers[url] = callback
 }
 
 func (r *testRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
