@@ -8,8 +8,8 @@ import (
 type DataCenters []DataCenter
 
 type DataCenter struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 const DataCentersURL = APIRoot + "/datacenters/%s"
@@ -21,8 +21,8 @@ func (d DataCenters) URL(a string) (string, error) {
 type DataCenterCapabilities struct {
 	DataCenter DataCenter `json:"-"`
 	Templates  []struct {
-		Name        string
-		Description string
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}
 }
 

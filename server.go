@@ -8,8 +8,8 @@ import (
 const ServerURL = APIRoot + "/servers/%s/%s"
 
 type Server struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func (s Server) URL(a string) (string, error) {
