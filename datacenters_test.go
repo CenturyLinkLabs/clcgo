@@ -1,5 +1,6 @@
 package clcgo
 
+import "encoding/json"
 import "testing"
 
 func TestWorkingDataCentersURL(t *testing.T) {
@@ -43,7 +44,7 @@ func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
 	d := DataCenterCapabilities{}
 	j := []byte(`{"templates":[ { "name":"CENTOS-6-64-TEMPLATE" } ]}`)
 
-	err := d.Unmarshal(j)
+	err := json.Unmarshal(j, &d)
 
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
