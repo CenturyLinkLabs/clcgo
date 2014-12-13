@@ -1,8 +1,9 @@
 package clcgo
 
+import "encoding/json"
+
 type Entity interface {
 	URL(string) (string, error)
-	Unmarshal([]byte) error
 }
 
 const APIRoot = "https://api.tier3.com/v2"
@@ -20,5 +21,6 @@ func getEntity(r Requestor, c Credentials, e Entity) error {
 	if err != nil {
 		return err
 	}
-	return e.Unmarshal(j)
+
+	return json.Unmarshal(j, &e)
 }

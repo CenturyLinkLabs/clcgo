@@ -1,7 +1,6 @@
 package clcgo
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -17,10 +16,6 @@ const DataCentersURL = APIRoot + "/datacenters/%s"
 
 func (d DataCenters) URL(a string) (string, error) {
 	return fmt.Sprintf(DataCentersURL, a), nil
-}
-
-func (d *DataCenters) Unmarshal(j []byte) error {
-	return json.Unmarshal(j, &d)
 }
 
 type DataCenterCapabilities struct {
@@ -39,8 +34,4 @@ func (d DataCenterCapabilities) URL(a string) (string, error) {
 	}
 
 	return fmt.Sprintf(DataCenterCapabilitiesURL, a, d.DataCenter.ID), nil
-}
-
-func (d *DataCenterCapabilities) Unmarshal(j []byte) error {
-	return json.Unmarshal(j, &d)
 }

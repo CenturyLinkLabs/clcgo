@@ -1,7 +1,6 @@
 package clcgo
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -19,8 +18,4 @@ func (s Server) URL(a string) (string, error) {
 	}
 
 	return fmt.Sprintf(ServerURL, a, s.ID), nil
-}
-
-func (s *Server) Unmarshal(j []byte) error {
-	return json.Unmarshal(j, s)
 }
