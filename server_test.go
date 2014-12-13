@@ -1,8 +1,32 @@
 package clcgo
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 )
+
+func TestServerJSONUnmarshalling(t *testing.T) {
+	template := `{"id": "%s", "name": "%s"}`
+	id := "foo"
+	name := "bar"
+	j := fmt.Sprintf(template, id, name)
+
+	s := Server{}
+	err := json.Unmarshal([]byte(j), &s)
+
+	if err != nil {
+		t.Errorf("Expected no error, got '%s'", err)
+	}
+
+	if s.ID != id {
+		t.Errorf("Expected ID to be '%s', was '%s'", id, s.ID)
+	}
+
+	if s.Name != name {
+		t.Errorf("Expected Name to be '%s', was '%s'", name, s.Name)
+	}
+}
 
 func TestWorkingServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
