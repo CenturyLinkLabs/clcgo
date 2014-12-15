@@ -3,6 +3,8 @@ package clcgo
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func (r testRequestor) GetJSON(t string, url string) ([]byte, error) {
@@ -22,22 +24,14 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 
 	r.registerGetHandler(url, func(token string, url string) (string, error) {
-		if e := "token"; token != e {
-			t.Errorf("Expected token '%s', got '%s'", e, token)
-		}
+		assert.Equal(t, "token", token)
 		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
 	})
 
 	s := Server{ID: id}
 	err := getEntity(&r, c, &s)
-
-	if err != nil {
-		t.Errorf("Expected no error, got '%s'", err)
-	}
-
-	if e := "testname"; s.Name != e {
-		t.Errorf("Expected Name to be '%s', got '%s'", e, s.Name)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "testname", s.Name)
 }
 
 func TestErroredURLInGetEntity(t *testing.T) {
@@ -47,9 +41,7 @@ func TestErroredURLInGetEntity(t *testing.T) {
 	err := getEntity(&r, c, &s)
 
 	_, e := s.URL("abc123")
-	if err.Error() != e.Error() {
-		t.Errorf("Expected the error '%s', got '%s'", e, err)
-	}
+	assert.EqualError(t, err, e.Error())
 }
 
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
@@ -60,9 +52,7 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	err := getEntity(&r, c, &s)
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
-	if e := fmt.Sprintf("There is no handler for the URL '%s'", url); err.Error() != e {
-		t.Errorf("Expected the error '%s', got '%s'", e, err)
-	}
+	assert.EqualError(t, err, fmt.Sprintf("There is no handler for the URL '%s'", url))
 }
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
@@ -78,7 +68,5 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	err := getEntity(&r, c, &s)
 
-	if e := "unexpected end of JSON input"; err.Error() != e {
-		t.Errorf("Expected the error '%s', got '%s'", e, err)
-	}
+	assert.EqualError(t, err, "unexpected end of JSON input")
 }

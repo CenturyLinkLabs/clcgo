@@ -1,30 +1,24 @@
 package clcgo
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 	r := newTestRequestor()
 
 	r.registerHandler(AuthenticationURL, func(url string, parameters authParameters) (string, error) {
-		if parameters.Username != "username" {
-			t.Errorf("Expected Username to be username, got '%s'", parameters.Username)
-		}
-
-		if parameters.Password != "password" {
-			t.Errorf("Expected Password to be password, got '%s'", parameters.Password)
-		}
+		assert.Equal(t, "username", parameters.Username)
+		assert.Equal(t, "password", parameters.Password)
 
 		return `{"bearerToken":"expected token"}`, nil
 	})
 
 	credentials, err := fetchCredentials(&r, "username", "password")
-	if err != nil {
-		t.Errorf("Expected no error, got '%s'", err)
-	}
-
-	if credentials.BearerToken != "expected token" {
-		t.Errorf("Expected a BearerToken and got '%s'", credentials.BearerToken)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "expected token", credentials.BearerToken)
 }
 
 func TestFetchCredentialsWithBadCredentials(t *testing.T) {
@@ -35,12 +29,6 @@ func TestFetchCredentialsWithBadCredentials(t *testing.T) {
 	})
 
 	credentials, err := fetchCredentials(&r, "username", "password")
-	e := Credentials{}
-	if credentials != e {
-		t.Errorf("Expected empty Credentials, got '%s'", credentials)
-	}
-
-	if err.Error() != "There was a problem with your credentials" {
-		t.Errorf("Expected specific error message, got '%s'", err)
-	}
+	assert.EqualError(t, err, "There was a problem with your credentials")
+	assert.Equal(t, Credentials{}, credentials)
 }
