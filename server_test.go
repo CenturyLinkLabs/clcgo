@@ -2,30 +2,22 @@ package clcgo
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWorkingServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
 	u, err := s.URL("AA")
-	if err != nil {
-		t.Errorf("Expected no error, got '%s'", err)
-	}
-	if e := APIRoot + "/servers/AA/abc123"; u != e {
-		t.Errorf("Expected URL to be '%s', was '%s'", e, u)
-	}
+
+	assert.NoError(t, err)
+	assert.Equal(t, APIRoot+"/servers/AA/abc123", u)
 }
 
 func TestErroredServerURL(t *testing.T) {
 	s := Server{}
 	u, err := s.URL("AA")
-	if err == nil {
-		t.Errorf("Expected an error, got nothing")
-	} else {
-		if e := "The server needs an ID attribute to generate a URL"; err.Error() != e {
-			t.Errorf("Expected the error '%s', got nothing", e)
-		}
-	}
-	if u != "" {
-		t.Errorf("Expected empty URL, got '%s'", u)
-	}
+
+	assert.EqualError(t, err, "The server needs an ID attribute to generate a URL")
+	assert.Empty(t, u)
 }
