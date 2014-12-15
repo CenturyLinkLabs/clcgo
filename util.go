@@ -30,8 +30,7 @@ func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	// TODO: DisableKeepAlives is pretty much just for tests...
-	client := http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+	client := http.Client{}
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
 	if err != nil {

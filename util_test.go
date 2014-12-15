@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -14,28 +14,8 @@ type testParameters struct {
 	TestKey string
 }
 
-func startServer(uri string, handler func(w http.ResponseWriter, r *http.Request)) (string, *net.TCPListener) {
-	laddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:31981")
-	if nil != err {
-		panic("Couldn't start server")
-	}
-	listener, err := net.ListenTCP("tcp", laddr)
-	if nil != err {
-		panic("Couldn't start server")
-	}
-
-	h := http.NewServeMux()
-
-	h.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r)
-	})
-
-	go http.Serve(listener, h)
-	return "http://127.0.0.1:31981", listener
-}
-
 func TestSuccessfulPostJSON(t *testing.T) {
-	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			t.Errorf("Expected request method to be of type 'POST', got '%s'", r.Method)
 		}
@@ -60,11 +40,11 @@ func TestSuccessfulPostJSON(t *testing.T) {
 		}
 
 		fmt.Fprintf(w, "Response Text")
-	})
-	defer l.Close()
+	}))
+	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON(root+"/example", testParameters{"Testing"})
+	response, err := r.PostJSON(ts.URL, testParameters{"Testing"})
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
@@ -76,13 +56,13 @@ func TestSuccessfulPostJSON(t *testing.T) {
 }
 
 func TestUnhandledStatusOnPostJSON(t *testing.T) {
-	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", 400)
-	})
-	defer l.Close()
+	}))
+	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON(root+"/example", testParameters{"Testing"})
+	response, err := r.PostJSON(ts.URL, testParameters{"Testing"})
 	if a := strings.TrimSpace(string(response)); a != "Bad Request" {
 		t.Errorf("Expected response 'Bad Request', got '%s'", a)
 	}
@@ -100,7 +80,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 }
 
 func TestSuccessfulGetJSON(t *testing.T) {
-	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Response Text")
 
 		a := r.Header.Get("Authorization")
@@ -119,11 +99,11 @@ func TestSuccessfulGetJSON(t *testing.T) {
 		if a := r.Header.Get("accepts"); a != "application/json" {
 			t.Errorf("Expected request accepts to be 'application/json', got '%s'", a)
 		}
-	})
-	defer l.Close()
+	}))
+	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", root+"/example")
+	response, err := r.GetJSON("token", ts.URL)
 	if err != nil {
 		t.Errorf("Expected no error, got '%s'", err)
 	}
@@ -135,13 +115,13 @@ func TestSuccessfulGetJSON(t *testing.T) {
 }
 
 func TestErrored401GetJson(t *testing.T) {
-	root, l := startServer("/example", func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", 400)
-	})
-	defer l.Close()
+	}))
+	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", root+"/example")
+	response, err := r.GetJSON("token", ts.URL)
 
 	if a := strings.TrimSpace(string(response)); a != "Bad Request" {
 		t.Errorf("Expected response 'Bad Request', got '%s'", a)
