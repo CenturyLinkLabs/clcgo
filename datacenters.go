@@ -6,9 +6,7 @@ import (
 	"fmt"
 )
 
-type DataCenters struct {
-	DataCenters []DataCenter
-}
+type DataCenters []DataCenter
 
 type DataCenter struct {
 	ID   string
@@ -22,7 +20,7 @@ func (d DataCenters) URL(a string) (string, error) {
 }
 
 func (d *DataCenters) Unmarshal(j []byte) error {
-	return json.Unmarshal(j, &d.DataCenters)
+	return json.Unmarshal(j, &d)
 }
 
 type DataCenterCapabilities struct {
