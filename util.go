@@ -55,7 +55,7 @@ func (r CLCRequestor) PostJSON(t string, url string, v interface{}) ([]byte, err
 	}
 
 	switch resp.StatusCode {
-	case 200:
+	case 200, 201, 202:
 		return body, nil
 	case 401:
 		return body, RequestError{"Your bearer token was rejected", 401}

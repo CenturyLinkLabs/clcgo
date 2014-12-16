@@ -17,6 +17,9 @@ func (r testRequestor) GetJSON(t string, url string) ([]byte, error) {
 	return nil, fmt.Errorf("There is no handler for the URL '%s'", url)
 }
 
+// TODO look at implementing a testEntity like is done with testSavable in the
+// savable_entities_test.
+
 func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	id := "abc123"
@@ -29,7 +32,7 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	})
 
 	s := Server{ID: id}
-	err := getEntity(&r, c, &s)
+	err := getEntity(r, c, &s)
 	assert.NoError(t, err)
 	assert.Equal(t, "testname", s.Name)
 }
@@ -49,7 +52,7 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	id := "abc123"
 	s := Server{ID: id}
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	err := getEntity(&r, c, &s)
+	err := getEntity(r, c, &s)
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
 	assert.EqualError(t, err, fmt.Sprintf("There is no handler for the URL '%s'", url))
@@ -66,7 +69,7 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 
 	s := Server{ID: id}
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	err := getEntity(&r, c, &s)
+	err := getEntity(r, c, &s)
 
 	assert.EqualError(t, err, "unexpected end of JSON input")
 }

@@ -6,6 +6,12 @@ type Entity interface {
 	URL(string) (string, error)
 }
 
+type Link struct {
+	ID   string `json:"id"`
+	Rel  string `json:"rel"`
+	HRef string `json:"href"`
+}
+
 const APIRoot = "https://api.tier3.com/v2"
 
 func GetEntity(c Credentials, e Entity) error {
