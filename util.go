@@ -9,7 +9,7 @@ import (
 )
 
 type Requestor interface {
-	PostJSON(url string, v interface{}) ([]byte, error)
+	PostJSON(t string, url string, v interface{}) ([]byte, error)
 	GetJSON(t string, url string) ([]byte, error)
 }
 
@@ -24,7 +24,7 @@ func (r RequestError) Error() string {
 	return r.Err
 }
 
-func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
+func (r CLCRequestor) PostJSON(t string, url string, v interface{}) ([]byte, error) {
 	json, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -37,6 +37,9 @@ func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 		return nil, err
 	}
 
+	if t != "" {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accepts", "application/json")
 
@@ -51,16 +54,18 @@ func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	switch resp.StatusCode {
+	case 200:
+		return body, nil
+	case 401:
+		return body, RequestError{"Your bearer token was rejected", 401}
+	default:
 		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
 	}
-
-	return body, nil
 }
 
 func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
-	// TODO: DisableKeepAlives is pretty much just for tests...
-	client := http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+	client := http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -82,9 +87,12 @@ func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	switch resp.StatusCode {
+	case 200:
+		return body, nil
+	case 401:
+		return body, RequestError{"Your bearer token was rejected", 401}
+	default:
 		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
 	}
-
-	return body, nil
 }
