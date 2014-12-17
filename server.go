@@ -12,6 +12,7 @@ const (
 )
 
 type Server struct {
+	uuidURI        string `json:"-"`
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	GroupID        string `json:"groupId"`
@@ -26,8 +27,10 @@ type serverCreationResponse struct {
 }
 
 func (s Server) URL(a string) (string, error) {
-	if s.ID == "" {
+	if s.ID == "" && s.uuidURI == "" {
 		return "", errors.New("An ID field is required to get a server")
+	} else if s.uuidURI != "" {
+		return APIDomain + s.uuidURI, nil
 	}
 
 	return fmt.Sprintf(ServerURL, a, s.ID), nil
@@ -61,11 +64,17 @@ func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 		return nil, err
 	}
 
-	for _, l := range scr.Links {
-		if l.Rel == "status" {
-			return &Status{URI: l.HRef}, nil
-		}
+	sl, err := typeFromLinks("status", scr.Links)
+	if err != nil {
+		return nil, errors.New("The creation response has no status link")
 	}
 
-	return nil, errors.New("The creation response has no status link")
+	il, err := typeFromLinks("self", scr.Links)
+	if err != nil {
+		return nil, errors.New("The creation response has no self link")
+	}
+
+	s.uuidURI = il.HRef
+
+	return &Status{URI: sl.HRef}, nil
 }

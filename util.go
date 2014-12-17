@@ -96,3 +96,13 @@ func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
 		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
 	}
 }
+
+func typeFromLinks(t string, ls []Link) (Link, error) {
+	for _, l := range ls {
+		if l.Rel == t {
+			return l, nil
+		}
+	}
+
+	return Link{}, fmt.Errorf("No link of type '%s'", t)
+}

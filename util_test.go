@@ -132,3 +132,16 @@ func TestErrored400GetJson(t *testing.T) {
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
 }
+
+func TestTypeFromLinks(t *testing.T) {
+	l := Link{Rel: "t"}
+	ls := []Link{l}
+
+	found, err := typeFromLinks("t", ls)
+	assert.NoError(t, err)
+	assert.Equal(t, l, found)
+
+	found, err = typeFromLinks("bad", ls)
+	assert.EqualError(t, err, "No link of type 'bad'")
+	assert.Equal(t, Link{}, found)
+}

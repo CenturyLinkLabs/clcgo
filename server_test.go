@@ -33,6 +33,12 @@ func TestErroredServerURL(t *testing.T) {
 	assert.Empty(t, u)
 }
 
+func TestURLMissingIDHavingUUID(t *testing.T) {
+	u, err := Server{uuidURI: "/v2/alias/1234?uuid=true"}.URL("AA")
+	assert.NoError(t, err)
+	assert.Equal(t, APIDomain+"/v2/alias/1234?uuid=true", u)
+}
+
 func TestURLForSave(t *testing.T) {
 	url, err := Server{}.URLForSave("AA")
 	assert.NoError(t, err)
