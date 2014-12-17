@@ -60,7 +60,7 @@ func TestSuccessfulStatusFromResponse(t *testing.T) {
 	srv := Server{}
 	s, err := srv.StatusFromResponse([]byte(serverCreationSuccessfulResponse))
 	assert.NoError(t, err)
-	assert.Equal(t, "/path/to/status", s.URL)
+	assert.Equal(t, "/path/to/status", s.URI)
 }
 
 func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {

@@ -6,10 +6,6 @@ type SavableEntity interface {
 	StatusFromResponse([]byte) (*Status, error)
 }
 
-type Status struct {
-	URL string
-}
-
 func SaveEntity(c Credentials, e SavableEntity) (*Status, error) {
 	return saveEntity(CLCRequestor{}, c, e)
 }

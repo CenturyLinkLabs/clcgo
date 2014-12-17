@@ -63,7 +63,7 @@ func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 
 	for _, l := range scr.Links {
 		if l.Rel == "status" {
-			return &Status{URL: l.HRef}, nil
+			return &Status{URI: l.HRef}, nil
 		}
 	}
 

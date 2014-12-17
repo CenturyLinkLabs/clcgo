@@ -38,7 +38,7 @@ func (s testSavable) StatusFromResponse(r []byte) (*Status, error) {
 		return s.CallbackForStatus(r)
 	}
 
-	return &Status{URL: "example.com/savable_status"}, nil
+	return &Status{URI: "example.com/savable_status"}, nil
 }
 
 func TestSuccessfulSaveEntity(t *testing.T) {
