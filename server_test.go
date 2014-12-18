@@ -27,13 +27,12 @@ func TestImplementations(t *testing.T) {
 }
 
 func TestServerJSONUnmarshalling(t *testing.T) {
-	j := `{"id": "foo", "name": "bar", "groupId": "123il"}`
 	s := Server{}
-	err := json.Unmarshal([]byte(j), &s)
+	err := json.Unmarshal([]byte(serverResponse), &s)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "foo", s.ID)
-	assert.Equal(t, "bar", s.Name)
+	assert.Equal(t, "test-id", s.ID)
+	assert.Equal(t, "Test Name", s.Name)
 	assert.Equal(t, "123il", s.GroupID)
 }
 

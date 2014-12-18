@@ -1,6 +1,11 @@
 package clcgo
 
 const (
+	serverResponse = `{
+		"id": "test-id",
+		"name": "Test Name",
+		"groupId": "123il"
+	}`
 	serverCreationSuccessfulResponse = `{
 		"server":"web",
 		"isQueued":true,
@@ -36,5 +41,11 @@ const (
 		"rel":"status",
 		"href":"/path/to/status",
 		"id":"id-for-status"
+	}`
+
+	dataCenterCapabilitiesResponse = `{
+		"templates": [
+			{ "name": "Name", "description": "Description" }
+		]
 	}`
 )
