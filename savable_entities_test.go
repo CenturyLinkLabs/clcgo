@@ -51,7 +51,7 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("/servers", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/servers", func(token string, req Request) (string, error) {
 		assert.Equal(t, "token", token)
 		assert.Equal(t, p, req.Parameters)
 
@@ -82,7 +82,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{}
 
-	r.registerHandler("/server/creation/url", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/server/creation/url", func(token string, req Request) (string, error) {
 		return "", errors.New("Error from PostJSON")
 	})
 
@@ -100,7 +100,7 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("/server/creation/url", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/server/creation/url", func(token string, req Request) (string, error) {
 		return "response", nil
 	})
 

@@ -16,7 +16,7 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	url := fmt.Sprintf(ServerURL, "AA", id)
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 
-	r.registerGetHandler(url, func(token string, req Request) (string, error) {
+	r.registerHandler("GET", url, func(token string, req Request) (string, error) {
 		assert.Equal(t, "token", token)
 		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
 	})
@@ -45,7 +45,7 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	err := getEntity(r, c, &s)
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
-	assert.EqualError(t, err, fmt.Sprintf("There is no handler for the URL '%s'", url))
+	assert.EqualError(t, err, fmt.Sprintf("There is no handler for GET '%s'", url))
 }
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
@@ -53,7 +53,7 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	id := "abc123"
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
-	r.registerGetHandler(url, func(token string, req Request) (string, error) {
+	r.registerHandler("GET", url, func(token string, req Request) (string, error) {
 		return ``, nil
 	})
 
