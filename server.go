@@ -21,6 +21,12 @@ type Server struct {
 	CPU            int    `json:"cpu"`
 	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
 	Type           string `json:"type"`
+	Details        struct {
+		IPAddresses []struct {
+			Public   string `json:"public"`
+			Internal string `json:"internal"`
+		} `json:"ipAddresses"`
+	} `json:"details"`
 }
 
 type serverCreationResponse struct {

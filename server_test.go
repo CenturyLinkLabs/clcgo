@@ -34,6 +34,8 @@ func TestServerJSONUnmarshalling(t *testing.T) {
 	assert.Equal(t, "test-id", s.ID)
 	assert.Equal(t, "Test Name", s.Name)
 	assert.Equal(t, "123il", s.GroupID)
+	assert.Len(t, s.Details.IPAddresses, 2)
+	assert.Equal(t, "8.8.8.8", s.Details.IPAddresses[1].Public)
 }
 
 func TestWorkingServerURL(t *testing.T) {
