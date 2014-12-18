@@ -32,7 +32,7 @@ func TestSuccessfulUnauthenticatedPostJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
 	response, err := r.PostJSON("", req)
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	req := Request{URL: ts.URL, Parameters: testParameters{}}
 	_, err := r.PostJSON("token", req)
 	assert.NoError(t, err)
@@ -60,7 +60,7 @@ func TestUnauthorizedPostJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	req := Request{URL: ts.URL, Parameters: testParameters{}}
 	_, err := r.PostJSON("token", req)
 	reqErr, ok := err.(RequestError)
@@ -76,7 +76,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
 	response, err := r.PostJSON("", req)
 	assert.Contains(t, string(response), "Bad Request")
@@ -99,7 +99,7 @@ func TestSuccessfulGetJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.NoError(t, err)
 	assert.Equal(t, "Response Text", string(response))
@@ -111,7 +111,7 @@ func TestUnauthorizedGetJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	_, err := r.GetJSON("token", Request{URL: ts.URL})
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
@@ -126,7 +126,7 @@ func TestErrored400GetJson(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
+	r := &clcRequestor{}
 	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.Contains(t, string(response), "Bad Request")
 

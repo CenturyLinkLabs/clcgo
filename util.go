@@ -13,7 +13,7 @@ type Requestor interface {
 	GetJSON(string, Request) ([]byte, error)
 }
 
-type CLCRequestor struct{}
+type clcRequestor struct{}
 
 type RequestError struct {
 	Err        string
@@ -24,7 +24,7 @@ func (r RequestError) Error() string {
 	return r.Err
 }
 
-func (r CLCRequestor) PostJSON(t string, req Request) ([]byte, error) {
+func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
 	json, err := json.Marshal(req.Parameters)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (r CLCRequestor) PostJSON(t string, req Request) ([]byte, error) {
 	}
 }
 
-func (r CLCRequestor) GetJSON(t string, req Request) ([]byte, error) {
+func (r clcRequestor) GetJSON(t string, req Request) ([]byte, error) {
 	client := http.Client{}
 
 	hr, err := http.NewRequest("GET", req.URL, nil)

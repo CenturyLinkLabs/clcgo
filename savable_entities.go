@@ -11,7 +11,7 @@ type SavableEntity interface {
 }
 
 func SaveEntity(c Credentials, e SavableEntity) (*Status, error) {
-	return saveEntity(CLCRequestor{}, c, e)
+	return saveEntity(clcRequestor{}, c, e)
 }
 
 func saveEntity(r Requestor, c Credentials, e SavableEntity) (*Status, error) {

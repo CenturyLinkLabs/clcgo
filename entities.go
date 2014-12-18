@@ -31,7 +31,7 @@ const (
 )
 
 func GetEntity(c Credentials, e Entity) error {
-	return getEntity(&CLCRequestor{}, c, e)
+	return getEntity(&clcRequestor{}, c, e)
 }
 
 func getEntity(r Requestor, c Credentials, e Entity) error {

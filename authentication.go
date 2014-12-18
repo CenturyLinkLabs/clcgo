@@ -18,7 +18,7 @@ type authParameters struct {
 const AuthenticationURL = "https://api.tier3.com/v2/authentication/login"
 
 func FetchCredentials(username string, password string) (Credentials, error) {
-	return fetchCredentials(&CLCRequestor{}, username, password)
+	return fetchCredentials(&clcRequestor{}, username, password)
 }
 
 func fetchCredentials(client Requestor, username string, password string) (Credentials, error) {
