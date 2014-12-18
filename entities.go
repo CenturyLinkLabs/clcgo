@@ -39,7 +39,7 @@ func getEntity(r Requestor, c Credentials, e Entity) error {
 	if err != nil {
 		return err
 	}
-	j, err := r.GetJSON(c.BearerToken, url)
+	j, err := r.GetJSON(c.BearerToken, Request{URL: url})
 	if err != nil {
 		return err
 	}

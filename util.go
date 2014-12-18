@@ -10,7 +10,7 @@ import (
 
 type Requestor interface {
 	PostJSON(string, Request) ([]byte, error)
-	GetJSON(string, string) ([]byte, error)
+	GetJSON(string, Request) ([]byte, error)
 }
 
 type CLCRequestor struct{}
@@ -64,19 +64,19 @@ func (r CLCRequestor) PostJSON(t string, req Request) ([]byte, error) {
 	}
 }
 
-func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
+func (r CLCRequestor) GetJSON(t string, req Request) ([]byte, error) {
 	client := http.Client{}
 
-	req, err := http.NewRequest("GET", url, nil)
+	hr, err := http.NewRequest("GET", req.URL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accepts", "application/json")
+	hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+	hr.Header.Add("Content-Type", "application/json")
+	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(hr)
 	if err != nil {
 		return nil, err
 	}

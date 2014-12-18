@@ -7,16 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (r testRequestor) GetJSON(t string, url string) ([]byte, error) {
-	callback, found := r.GetHandlers[url]
-	if found {
-		s, err := callback(t, url)
-		return []byte(s), err
-	}
-
-	return nil, fmt.Errorf("There is no handler for the URL '%s'", url)
-}
-
 // TODO look at implementing a testEntity like is done with testSavable in the
 // savable_entities_test.
 
@@ -26,7 +16,7 @@ func TestSuccessfulGetEntity(t *testing.T) {
 	url := fmt.Sprintf(ServerURL, "AA", id)
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 
-	r.registerGetHandler(url, func(token string, url string) (string, error) {
+	r.registerGetHandler(url, func(token string, req Request) (string, error) {
 		assert.Equal(t, "token", token)
 		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
 	})
@@ -63,7 +53,7 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	id := "abc123"
 	url := fmt.Sprintf(ServerURL, "AA", id)
 
-	r.registerGetHandler(url, func(token string, url string) (string, error) {
+	r.registerGetHandler(url, func(token string, req Request) (string, error) {
 		return ``, nil
 	})
 

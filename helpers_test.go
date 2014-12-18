@@ -2,7 +2,7 @@ package clcgo
 
 import "fmt"
 
-type getHandlerCallback func(string, string) (string, error)
+type getHandlerCallback func(string, Request) (string, error)
 type handlerCallback func(string, Request) (string, error)
 
 type testRequestor struct {
@@ -24,6 +24,16 @@ func (r *testRequestor) registerHandler(url string, callback handlerCallback) {
 
 func (r *testRequestor) registerGetHandler(url string, callback getHandlerCallback) {
 	r.GetHandlers[url] = callback
+}
+
+func (r testRequestor) GetJSON(t string, req Request) ([]byte, error) {
+	callback, found := r.GetHandlers[req.URL]
+	if found {
+		s, err := callback(t, req)
+		return []byte(s), err
+	}
+
+	return nil, fmt.Errorf("There is no handler for the URL '%s'", req.URL)
 }
 
 func (r testRequestor) PostJSON(t string, req Request) ([]byte, error) {

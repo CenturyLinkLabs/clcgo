@@ -100,7 +100,7 @@ func TestSuccessfulGetJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", ts.URL)
+	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.NoError(t, err)
 	assert.Equal(t, "Response Text", string(response))
 }
@@ -112,7 +112,7 @@ func TestUnauthorizedGetJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	_, err := r.GetJSON("token", ts.URL)
+	_, err := r.GetJSON("token", Request{URL: ts.URL})
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
 		assert.EqualError(t, reqErr, "Your bearer token was rejected")
@@ -127,7 +127,7 @@ func TestErrored400GetJson(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", ts.URL)
+	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.Contains(t, string(response), "Bad Request")
 
 	reqErr, ok := err.(RequestError)
