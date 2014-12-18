@@ -1,8 +1,12 @@
 package clcgo
 
+type Request struct {
+	URL        string
+	Parameters interface{}
+}
+
 type SavableEntity interface {
-	URLForSave(string) (string, error)
-	ParametersForSave() (interface{}, error)
+	RequestForSave(string) (Request, error)
 	StatusFromResponse([]byte) (*Status, error)
 }
 
@@ -11,15 +15,11 @@ func SaveEntity(c Credentials, e SavableEntity) (*Status, error) {
 }
 
 func saveEntity(r Requestor, c Credentials, e SavableEntity) (*Status, error) {
-	url, err := e.URLForSave(c.AccountAlias)
+	req, err := e.RequestForSave(c.AccountAlias)
 	if err != nil {
 		return nil, err
 	}
-	params, err := e.ParametersForSave()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := r.PostJSON(c.BearerToken, url, params)
+	resp, err := r.PostJSON(c.BearerToken, req)
 	if err != nil {
 		return nil, err
 	}

@@ -36,11 +36,17 @@ func (s Server) URL(a string) (string, error) {
 	return fmt.Sprintf(ServerURL, a, s.ID), nil
 }
 
-func (s Server) URLForSave(a string) (string, error) {
-	return fmt.Sprintf(ServerCreationURL, a), nil
+func (s Server) RequestForSave(a string) (Request, error) {
+	url := fmt.Sprintf(ServerCreationURL, a)
+	p, err := s.parametersForSave()
+	if err != nil {
+		return Request{}, err
+	}
+
+	return Request{URL: url, Parameters: p}, nil
 }
 
-func (s Server) ParametersForSave() (interface{}, error) {
+func (s Server) parametersForSave() (interface{}, error) {
 	// TODO Freak out when the combo of AccountAlias and Name is too long! Which
 	// is programatically defined and I don't have the rules.
 	// TODO Well, actually.... CPU, MemoryGB, and Type are required, too! Those

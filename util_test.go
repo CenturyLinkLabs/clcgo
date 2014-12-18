@@ -33,7 +33,8 @@ func TestSuccessfulUnauthenticatedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON("", ts.URL, testParameters{"Testing"})
+	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	response, err := r.PostJSON("", req)
 	assert.NoError(t, err)
 
 	responseString := string(response)
@@ -48,7 +49,8 @@ func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	_, err := r.PostJSON("token", ts.URL, testParameters{})
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
 	assert.NoError(t, err)
 }
 
@@ -59,7 +61,8 @@ func TestUnauthorizedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	_, err := r.PostJSON("token", ts.URL, testParameters{})
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
 		assert.EqualError(t, reqErr, "Your bearer token was rejected")
@@ -74,7 +77,8 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &CLCRequestor{}
-	response, err := r.PostJSON("", ts.URL, testParameters{"Testing"})
+	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	response, err := r.PostJSON("", req)
 	assert.Contains(t, string(response), "Bad Request")
 
 	reqErr, ok := err.(RequestError)

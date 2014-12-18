@@ -8,29 +8,23 @@ import (
 )
 
 type testSavable struct {
-	CallbackForURL        func(string) (string, error)
-	CallbackForParameters func() (interface{}, error)
-	CallbackForStatus     func([]byte) (*Status, error)
+	CallbackForRequest func(string) (Request, error)
+	CallbackForStatus  func([]byte) (*Status, error)
 }
 
 type savableCreationParameters struct {
 	Value string
 }
 
-func (s testSavable) URLForSave(a string) (string, error) {
-	if s.CallbackForURL != nil {
-		return s.CallbackForURL(a)
+func (s testSavable) RequestForSave(a string) (Request, error) {
+	if s.CallbackForRequest != nil {
+		return s.CallbackForRequest(a)
 	}
 
-	return "/server/creation/url", nil
-}
-
-func (s testSavable) ParametersForSave() (interface{}, error) {
-	if s.CallbackForParameters != nil {
-		return s.CallbackForParameters()
-	}
-
-	return savableCreationParameters{Value: "testSavable"}, nil
+	return Request{
+		URL:        "/server/creation/url",
+		Parameters: savableCreationParameters{Value: "testSavable"},
+	}, nil
 }
 
 func (s testSavable) StatusFromResponse(r []byte) (*Status, error) {
@@ -47,12 +41,9 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 	p := savableCreationParameters{Value: "testSavable"}
 	st := &Status{}
 	s := testSavable{
-		CallbackForURL: func(a string) (string, error) {
+		CallbackForRequest: func(a string) (Request, error) {
 			assert.Equal(t, "AA", a)
-			return "/servers", nil
-		},
-		CallbackForParameters: func() (interface{}, error) {
-			return p, nil
+			return Request{URL: "/servers", Parameters: p}, nil
 		},
 		CallbackForStatus: func(r []byte) (*Status, error) {
 			assert.Equal(t, []byte(serverCreationSuccessfulResponse), r)
@@ -60,9 +51,9 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("/servers", func(token string, url string, v interface{}) (string, error) {
+	r.registerHandler("/servers", func(token string, req Request) (string, error) {
 		assert.Equal(t, "token", token)
-		assert.Equal(t, p, v)
+		assert.Equal(t, p, req.Parameters)
 
 		return serverCreationSuccessfulResponse, nil
 	})
@@ -72,32 +63,18 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 	assert.Equal(t, st, status)
 }
 
-func TestErroredURLSaveEntity(t *testing.T) {
+func TestErroredRequestSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{
-		CallbackForURL: func(a string) (string, error) {
-			return "", errors.New("Test URL Error")
+		CallbackForRequest: func(a string) (Request, error) {
+			return Request{}, errors.New("Test Request Error")
 		},
 	}
 
 	status, err := saveEntity(r, c, &s)
 	assert.Nil(t, status)
-	assert.EqualError(t, err, "Test URL Error")
-}
-
-func TestErroredParametersSaveEntity(t *testing.T) {
-	r := newTestRequestor()
-	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	s := testSavable{
-		CallbackForParameters: func() (interface{}, error) {
-			return nil, errors.New("Test Parameters Error")
-		},
-	}
-
-	status, err := saveEntity(r, c, &s)
-	assert.Nil(t, status)
-	assert.EqualError(t, err, "Test Parameters Error")
+	assert.EqualError(t, err, "Test Request Error")
 }
 
 func TestErroredPostJSONSaveEntity(t *testing.T) {
@@ -105,7 +82,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{}
 
-	r.registerHandler("/server/creation/url", func(token string, url string, v interface{}) (string, error) {
+	r.registerHandler("/server/creation/url", func(token string, req Request) (string, error) {
 		return "", errors.New("Error from PostJSON")
 	})
 
@@ -123,7 +100,7 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("/server/creation/url", func(token string, url string, v interface{}) (string, error) {
+	r.registerHandler("/server/creation/url", func(token string, req Request) (string, error) {
 		return "response", nil
 	})
 

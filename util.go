@@ -9,8 +9,8 @@ import (
 )
 
 type Requestor interface {
-	PostJSON(t string, url string, v interface{}) ([]byte, error)
-	GetJSON(t string, url string) ([]byte, error)
+	PostJSON(string, Request) ([]byte, error)
+	GetJSON(string, string) ([]byte, error)
 }
 
 type CLCRequestor struct{}
@@ -24,26 +24,26 @@ func (r RequestError) Error() string {
 	return r.Err
 }
 
-func (r CLCRequestor) PostJSON(t string, url string, v interface{}) ([]byte, error) {
-	json, err := json.Marshal(v)
+func (r CLCRequestor) PostJSON(t string, req Request) ([]byte, error) {
+	json, err := json.Marshal(req.Parameters)
 	if err != nil {
 		return nil, err
 	}
 
 	client := http.Client{}
 
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
+	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(json)))
 	if err != nil {
 		return nil, err
 	}
 
 	if t != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+		hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accepts", "application/json")
+	hr.Header.Add("Content-Type", "application/json")
+	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(hr)
 	if err != nil {
 		return nil, err
 	}

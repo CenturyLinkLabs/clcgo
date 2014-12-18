@@ -7,6 +7,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestImplementations(t *testing.T) {
+	es := []interface{}{
+		new(DataCenterCapabilities),
+		new(Server),
+		new(Status),
+	}
+	for _, e := range es {
+		assert.Implements(t, (*Entity)(nil), e)
+	}
+
+	ses := []interface{}{
+		new(Server),
+	}
+	for _, se := range ses {
+		assert.Implements(t, (*SavableEntity)(nil), se)
+	}
+}
+
 func TestServerJSONUnmarshalling(t *testing.T) {
 	j := `{"id": "foo", "name": "bar", "groupId": "123il"}`
 	s := Server{}
@@ -39,26 +57,21 @@ func TestURLMissingIDHavingUUID(t *testing.T) {
 	assert.Equal(t, APIDomain+"/v2/alias/1234?uuid=true", u)
 }
 
-func TestURLForSave(t *testing.T) {
-	url, err := Server{}.URLForSave("AA")
-	assert.NoError(t, err)
-	assert.Equal(t, APIRoot+"/servers/AA", url)
-}
-
-func TestSuccessfulParametersForSave(t *testing.T) {
+func TestServerRequestForSave(t *testing.T) {
 	s := Server{
 		Name:           "Test Name",
 		GroupID:        "1234IL",
 		SourceServerID: "TestID",
 	}
-	p, err := s.ParametersForSave()
+	req, err := s.RequestForSave("AA")
 	assert.NoError(t, err)
-	assert.Equal(t, s, p)
+	assert.Equal(t, APIRoot+"/servers/AA", req.URL)
+	assert.Equal(t, s, req.Parameters)
 }
 
-func TestUnsuccessfulParametersForSave(t *testing.T) {
-	p, err := Server{}.ParametersForSave()
-	assert.Nil(t, p)
+func TestErroredServerRequestForSave(t *testing.T) {
+	p, err := Server{}.RequestForSave("AA")
+	assert.Equal(t, Request{}, p)
 	assert.EqualError(t, err, "The following fields are required to save: Name, GroupID, SourceServerID")
 }
 

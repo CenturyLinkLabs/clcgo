@@ -22,8 +22,11 @@ func FetchCredentials(username string, password string) (Credentials, error) {
 }
 
 func fetchCredentials(client Requestor, username string, password string) (Credentials, error) {
-	c := authParameters{username, password}
-	response, err := client.PostJSON("", AuthenticationURL, c)
+	req := Request{
+		URL:        AuthenticationURL,
+		Parameters: authParameters{username, password},
+	}
+	response, err := client.PostJSON("", req)
 
 	if err != nil {
 		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
