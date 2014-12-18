@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	ServerURL         = APIRoot + "/servers/%s/%s"
-	ServerCreationURL = APIRoot + "/servers/%s"
+	ServerCreationURL  = APIRoot + "/servers/%s"
+	ServerURL          = ServerCreationURL + "/%s"
+	PublicIPAddressURL = ServerURL + "/publicIPAddresses"
 )
 
 type Server struct {
@@ -16,14 +17,24 @@ type Server struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	GroupID        string `json:"groupId"`
-	SourceServerID string `json:"sourceServerId"` // nonexistant in get, extract to creation params?
+	SourceServerID string `json:"sourceServerId"` // TODO: nonexistant in get, extract to creation params?
 	CPU            int    `json:"cpu"`
-	MemoryGB       int    `json:"memoryGB"` // is memoryMB in get, extract to creation params?
+	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
 	Type           string `json:"type"`
 }
 
 type serverCreationResponse struct {
 	Links []Link `json:"links"`
+}
+
+type PublicIPAddress struct {
+	Server Server
+	Ports  []Port `json:"ports"`
+}
+
+type Port struct {
+	Protocol string `json:"protocol"`
+	Port     int    `json:"port"`
 }
 
 func (s Server) URL(a string) (string, error) {
@@ -83,4 +94,23 @@ func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 	s.uuidURI = il.HRef
 
 	return &Status{URI: sl.HRef}, nil
+}
+
+func (i PublicIPAddress) RequestForSave(a string) (Request, error) {
+	if i.Server.ID == "" {
+		return Request{}, errors.New("A Server with an ID is required to add a Public IP Address")
+	}
+
+	url := fmt.Sprintf(PublicIPAddressURL, a, i.Server.ID)
+	return Request{URL: url, Parameters: i}, nil
+}
+
+func (i PublicIPAddress) StatusFromResponse(r []byte) (*Status, error) {
+	l := Link{}
+	err := json.Unmarshal(r, &l)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Status{URI: l.HRef}, nil
 }

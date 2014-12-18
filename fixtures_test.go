@@ -31,4 +31,10 @@ const (
 			}
 		]
 	}`
+
+	addPublicIPAddressSuccessfulResponse = `{
+		"rel":"status",
+		"href":"/path/to/status",
+		"id":"id-for-status"
+	}`
 )

@@ -19,6 +19,7 @@ func TestImplementations(t *testing.T) {
 
 	ses := []interface{}{
 		new(Server),
+		new(PublicIPAddress),
 	}
 	for _, se := range ses {
 		assert.Implements(t, (*SavableEntity)(nil), se)
@@ -87,4 +88,31 @@ func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	s, err := srv.StatusFromResponse([]byte(serverCreationMissingStatusResponse))
 	assert.Nil(t, s)
 	assert.EqualError(t, err, "The creation response has no status link")
+}
+
+func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
+	s := Server{ID: "1234il"}
+	ps := []Port{Port{Protocol: "TCP", Port: 31981}}
+	i := PublicIPAddress{Server: s, Ports: ps}
+	req, err := i.RequestForSave("AA")
+
+	assert.NoError(t, err)
+	assert.Equal(t, APIDomain+"/v2/servers/AA/1234il/publicIPAddresses", req.URL)
+	assert.Equal(t, i, req.Parameters)
+}
+
+func TestErroredIPAddressResponseForSave(t *testing.T) {
+	s := Server{}
+	i := PublicIPAddress{Server: s}
+	req, err := i.RequestForSave("AA")
+
+	assert.Equal(t, Request{}, req)
+	assert.EqualError(t, err, "A Server with an ID is required to add a Public IP Address")
+}
+
+func TestIPAddressStatusFromResponse(t *testing.T) {
+	i := PublicIPAddress{}
+	s, err := i.StatusFromResponse([]byte(addPublicIPAddressSuccessfulResponse))
+	assert.NoError(t, err)
+	assert.Equal(t, "/path/to/status", s.URI)
 }
