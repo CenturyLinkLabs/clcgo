@@ -43,14 +43,8 @@ func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 }
 
 func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
-	templates := `{
-		"templates": [
-			{ "name": "Name", "description": "Description" }
-		]
-	}`
-
 	d := DataCenterCapabilities{}
-	err := json.Unmarshal([]byte(templates), &d)
+	err := json.Unmarshal([]byte(dataCenterCapabilitiesResponse), &d)
 
 	assert.NoError(t, err)
 	assert.Len(t, d.Templates, 1)

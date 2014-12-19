@@ -6,10 +6,32 @@ type Entity interface {
 	URL(string) (string, error)
 }
 
-const APIRoot = "https://api.tier3.com/v2"
+type Status struct {
+	Status string
+	URI    string
+}
+
+func (s Status) URL(a string) (string, error) {
+	return APIDomain + s.URI, nil
+}
+
+func (s Status) HasSucceeded() bool {
+	return s.Status == "succeeded"
+}
+
+type Link struct {
+	ID   string `json:"id"`
+	Rel  string `json:"rel"`
+	HRef string `json:"href"`
+}
+
+const (
+	APIDomain = "https://api.tier3.com"
+	APIRoot   = APIDomain + "/v2"
+)
 
 func GetEntity(c Credentials, e Entity) error {
-	return getEntity(&CLCRequestor{}, c, e)
+	return getEntity(&clcRequestor{}, c, e)
 }
 
 func getEntity(r Requestor, c Credentials, e Entity) error {
@@ -17,7 +39,7 @@ func getEntity(r Requestor, c Credentials, e Entity) error {
 	if err != nil {
 		return err
 	}
-	j, err := r.GetJSON(c.BearerToken, url)
+	j, err := r.GetJSON(c.BearerToken, Request{URL: url})
 	if err != nil {
 		return err
 	}

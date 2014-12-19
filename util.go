@@ -9,38 +9,49 @@ import (
 )
 
 type Requestor interface {
-	PostJSON(url string, v interface{}) ([]byte, error)
-	GetJSON(t string, url string) ([]byte, error)
+	PostJSON(string, Request) ([]byte, error)
+	GetJSON(string, Request) ([]byte, error)
 }
 
-type CLCRequestor struct{}
+type clcRequestor struct{}
+
+type modelStates map[string][]string
 
 type RequestError struct {
-	Err        string
+	Message    string
 	StatusCode int
+	Errors     modelStates
+}
+
+type invalidReqestResponse struct {
+	Message    string      `json:"message"`
+	ModelState modelStates `json:"modelState"`
 }
 
 func (r RequestError) Error() string {
-	return r.Err
+	return r.Message
 }
 
-func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
-	json, err := json.Marshal(v)
+func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
+	j, err := json.Marshal(req.Parameters)
 	if err != nil {
 		return nil, err
 	}
 
 	client := http.Client{}
 
-	req, err := http.NewRequest("POST", url, strings.NewReader(string(json)))
+	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(j)))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accepts", "application/json")
+	if t != "" {
+		hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+	}
+	hr.Header.Add("Content-Type", "application/json")
+	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(hr)
 	if err != nil {
 		return nil, err
 	}
@@ -51,27 +62,37 @@ func (r CLCRequestor) PostJSON(url string, v interface{}) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
-		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
-	}
+	switch resp.StatusCode {
+	case 200, 201, 202:
+		return body, nil
+	case 400:
+		var e invalidReqestResponse
+		err := json.Unmarshal(body, &e)
+		if err != nil {
+			return body, err
+		}
 
-	return body, nil
+		return body, RequestError{Message: e.Message, StatusCode: 400, Errors: e.ModelState}
+	case 401:
+		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
+	default:
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
+	}
 }
 
-func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
-	// TODO: DisableKeepAlives is pretty much just for tests...
-	client := http.Client{Transport: &http.Transport{DisableKeepAlives: true}}
+func (r clcRequestor) GetJSON(t string, req Request) ([]byte, error) {
+	client := http.Client{}
 
-	req, err := http.NewRequest("GET", url, nil)
+	hr, err := http.NewRequest("GET", req.URL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accepts", "application/json")
+	hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+	hr.Header.Add("Content-Type", "application/json")
+	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(hr)
 	if err != nil {
 		return nil, err
 	}
@@ -82,9 +103,22 @@ func (r CLCRequestor) GetJSON(t string, url string) ([]byte, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
-		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
+	switch resp.StatusCode {
+	case 200:
+		return body, nil
+	case 401:
+		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
+	default:
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
+	}
+}
+
+func typeFromLinks(t string, ls []Link) (Link, error) {
+	for _, l := range ls {
+		if l.Rel == t {
+			return l, nil
+		}
 	}
 
-	return body, nil
+	return Link{}, fmt.Errorf("No link of type '%s'", t)
 }

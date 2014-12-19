@@ -15,9 +15,10 @@ type testParameters struct {
 	TestKey string
 }
 
-func TestSuccessfulPostJSON(t *testing.T) {
+func TestSuccessfulUnauthenticatedPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "POST", r.Method)
+		assert.Empty(t, r.Header.Get("Authorization"))
 		assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 		assert.Equal(t, "application/json", r.Header.Get("accepts"))
 
@@ -31,28 +32,82 @@ func TestSuccessfulPostJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
-	response, err := r.PostJSON(ts.URL, testParameters{"Testing"})
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	response, err := r.PostJSON("", req)
 	assert.NoError(t, err)
 
 	responseString := string(response)
 	assert.Equal(t, "Response Text", responseString)
 }
 
-func TestUnhandledStatusOnPostJSON(t *testing.T) {
+func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Bad Request", 400)
+		assert.Equal(t, "Bearer token", r.Header.Get("Authorization"))
+		fmt.Fprintf(w, "Response Text")
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
-	response, err := r.PostJSON(ts.URL, testParameters{"Testing"})
-	assert.Contains(t, string(response), "Bad Request")
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
+	assert.NoError(t, err)
+}
+
+func TestUnauthorizedPostJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Unauthorized", 401)
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
+	reqErr, ok := err.(RequestError)
+	if assert.True(t, ok) {
+		assert.EqualError(t, reqErr, "Your bearer token was rejected")
+		assert.Equal(t, 401, reqErr.StatusCode)
+	}
+}
+
+func TestUnhandledStatusOnPostJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "I'm a teapot", 418)
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	response, err := r.PostJSON("", req)
+	assert.Contains(t, string(response), "I'm a teapot")
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
 		assert.EqualError(t, reqErr, "Got an unexpected status code")
+		assert.Equal(t, 418, reqErr.StatusCode)
+	}
+}
+
+func Test400WithMessagesOnPostJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, serverCreationInvalidResponse, 400)
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
+
+	reqErr, ok := err.(RequestError)
+	if assert.True(t, ok) {
+		assert.EqualError(t, reqErr, "The request is invalid.")
 		assert.Equal(t, 400, reqErr.StatusCode)
+		if assert.Len(t, reqErr.Errors, 2) {
+			assert.Equal(t, "The name field is required.", reqErr.Errors["body.name"][0])
+			assert.Equal(
+				t, "The sourceServerId field is required.", reqErr.Errors["body.sourceServerId"][0],
+			)
+		}
 	}
 }
 
@@ -67,20 +122,35 @@ func TestSuccessfulGetJSON(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", ts.URL)
+	r := &clcRequestor{}
+	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.NoError(t, err)
 	assert.Equal(t, "Response Text", string(response))
 }
 
-func TestErrored401GetJson(t *testing.T) {
+func TestUnauthorizedGetJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Unauthorized", 401)
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	_, err := r.GetJSON("token", Request{URL: ts.URL})
+	reqErr, ok := err.(RequestError)
+	if assert.True(t, ok) {
+		assert.EqualError(t, reqErr, "Your bearer token was rejected")
+		assert.Equal(t, 401, reqErr.StatusCode)
+	}
+}
+
+func TestErrored400GetJson(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", 400)
 	}))
 	defer ts.Close()
 
-	r := &CLCRequestor{}
-	response, err := r.GetJSON("token", ts.URL)
+	r := &clcRequestor{}
+	response, err := r.GetJSON("token", Request{URL: ts.URL})
 	assert.Contains(t, string(response), "Bad Request")
 
 	reqErr, ok := err.(RequestError)
@@ -88,4 +158,17 @@ func TestErrored401GetJson(t *testing.T) {
 		assert.EqualError(t, reqErr, "Got an unexpected status code")
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
+}
+
+func TestTypeFromLinks(t *testing.T) {
+	l := Link{Rel: "t"}
+	ls := []Link{l}
+
+	found, err := typeFromLinks("t", ls)
+	assert.NoError(t, err)
+	assert.Equal(t, l, found)
+
+	found, err = typeFromLinks("bad", ls)
+	assert.EqualError(t, err, "No link of type 'bad'")
+	assert.Equal(t, Link{}, found)
 }
