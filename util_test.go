@@ -72,19 +72,42 @@ func TestUnauthorizedPostJSON(t *testing.T) {
 
 func TestUnhandledStatusOnPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Bad Request", 400)
+		http.Error(w, "I'm a teapot", 418)
 	}))
 	defer ts.Close()
 
 	r := &clcRequestor{}
 	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
 	response, err := r.PostJSON("", req)
-	assert.Contains(t, string(response), "Bad Request")
+	assert.Contains(t, string(response), "I'm a teapot")
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
 		assert.EqualError(t, reqErr, "Got an unexpected status code")
+		assert.Equal(t, 418, reqErr.StatusCode)
+	}
+}
+
+func Test400WithMessagesOnPostJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, serverCreationInvalidResponse, 400)
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	_, err := r.PostJSON("token", req)
+
+	reqErr, ok := err.(RequestError)
+	if assert.True(t, ok) {
+		assert.EqualError(t, reqErr, "The request is invalid.")
 		assert.Equal(t, 400, reqErr.StatusCode)
+		if assert.Len(t, reqErr.Errors, 2) {
+			assert.Equal(t, "The name field is required.", reqErr.Errors["body.name"][0])
+			assert.Equal(
+				t, "The sourceServerId field is required.", reqErr.Errors["body.sourceServerId"][0],
+			)
+		}
 	}
 }
 

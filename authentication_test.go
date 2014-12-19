@@ -28,7 +28,8 @@ func TestFetchCredentialsWithBadCredentials(t *testing.T) {
 	r := newTestRequestor()
 
 	r.registerHandler("POST", AuthenticationURL, func(token string, req Request) (string, error) {
-		return "Bad Request", RequestError{"There was a problem with the request", 400}
+		err := RequestError{Message: "There was a problem with the request", StatusCode: 400}
+		return "Bad Request", err
 	})
 
 	credentials, err := fetchCredentials(&r, "username", "password")

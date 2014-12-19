@@ -15,24 +15,32 @@ type Requestor interface {
 
 type clcRequestor struct{}
 
+type modelStates map[string][]string
+
 type RequestError struct {
-	Err        string
+	Message    string
 	StatusCode int
+	Errors     modelStates
+}
+
+type invalidReqestResponse struct {
+	Message    string      `json:"message"`
+	ModelState modelStates `json:"modelState"`
 }
 
 func (r RequestError) Error() string {
-	return r.Err
+	return r.Message
 }
 
 func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
-	json, err := json.Marshal(req.Parameters)
+	j, err := json.Marshal(req.Parameters)
 	if err != nil {
 		return nil, err
 	}
 
 	client := http.Client{}
 
-	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(json)))
+	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(j)))
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +65,18 @@ func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
 	switch resp.StatusCode {
 	case 200, 201, 202:
 		return body, nil
+	case 400:
+		var e invalidReqestResponse
+		err := json.Unmarshal(body, &e)
+		if err != nil {
+			return body, err
+		}
+
+		return body, RequestError{Message: e.Message, StatusCode: 400, Errors: e.ModelState}
 	case 401:
-		return body, RequestError{"Your bearer token was rejected", 401}
+		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
 	}
 }
 
@@ -91,9 +107,9 @@ func (r clcRequestor) GetJSON(t string, req Request) ([]byte, error) {
 	case 200:
 		return body, nil
 	case 401:
-		return body, RequestError{"Your bearer token was rejected", 401}
+		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{"Got an unexpected status code", resp.StatusCode}
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
 	}
 }
 
