@@ -9,7 +9,10 @@ import (
 
 type testSavable struct {
 	CallbackForRequest func(string) (request, error)
-	CallbackForStatus  func([]byte) (*Status, error)
+}
+
+type testStatusProviding struct {
+	CallbackForStatus func([]byte) (*Status, error)
 }
 
 type savableCreationParameters struct {
@@ -27,27 +30,25 @@ func (s testSavable) requestForSave(a string) (request, error) {
 	}, nil
 }
 
-func (s testSavable) statusFromResponse(r []byte) (*Status, error) {
-	if s.CallbackForStatus != nil {
-		return s.CallbackForStatus(r)
-	}
-
-	return &Status{URI: "example.com/savable_status"}, nil
+func (s testStatusProviding) requestForSave(a string) (request, error) {
+	return request{
+		URL:        "/server/creation/url",
+		Parameters: savableCreationParameters{Value: "testSavable"},
+	}, nil
 }
 
-func TestSuccessfulSaveEntity(t *testing.T) {
+func (s testStatusProviding) statusFromResponse(r []byte) (*Status, error) {
+	return s.CallbackForStatus(r)
+}
+
+func TestSuccessfulSavableSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	p := savableCreationParameters{Value: "testSavable"}
-	st := &Status{}
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
 			assert.Equal(t, "AA", a)
 			return request{URL: "/servers", Parameters: p}, nil
-		},
-		CallbackForStatus: func(r []byte) (*Status, error) {
-			assert.Equal(t, []byte(serverCreationSuccessfulResponse), r)
-			return st, nil
 		},
 	}
 
@@ -55,6 +56,26 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 		assert.Equal(t, "token", token)
 		assert.Equal(t, p, req.Parameters)
 
+		return serverCreationSuccessfulResponse, nil
+	})
+
+	status, err := saveEntity(r, c, &s)
+	assert.NoError(t, err)
+	assert.True(t, status.HasSucceeded())
+}
+
+func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
+	r := newTestRequestor()
+	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
+	st := &Status{}
+	s := testStatusProviding{
+		CallbackForStatus: func(r []byte) (*Status, error) {
+			assert.Equal(t, []byte(serverCreationSuccessfulResponse), r)
+			return st, nil
+		},
+	}
+
+	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
 		return serverCreationSuccessfulResponse, nil
 	})
 
@@ -94,7 +115,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 func TestErorredStatusSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	s := testSavable{
+	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
 			return nil, errors.New("Test Status Error")
 		},

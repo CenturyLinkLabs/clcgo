@@ -3,8 +3,9 @@ package clcgo
 import "encoding/json"
 
 const (
-	apiDomain = "https://api.tier3.com"
-	apiRoot   = apiDomain + "/v2"
+	apiDomain        = "https://api.tier3.com"
+	apiRoot          = apiDomain + "/v2"
+	successfulStatus = "succeeded"
 )
 
 // TODO Document this for this library's developers? Is there a flag to get it
@@ -23,7 +24,7 @@ func (s Status) url(a string) (string, error) {
 }
 
 func (s Status) HasSucceeded() bool {
-	return s.Status == "succeeded"
+	return s.Status == successfulStatus
 }
 
 type Link struct {

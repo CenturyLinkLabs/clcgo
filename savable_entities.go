@@ -7,6 +7,9 @@ type request struct {
 
 type savableEntity interface {
 	requestForSave(string) (request, error)
+}
+
+type statusProvidingEntity interface {
 	statusFromResponse([]byte) (*Status, error)
 }
 
@@ -23,10 +26,15 @@ func saveEntity(r requestor, c Credentials, e savableEntity) (*Status, error) {
 	if err != nil {
 		return nil, err
 	}
-	status, err := e.statusFromResponse(resp)
-	if err != nil {
-		return nil, err
+
+	if spe, ok := e.(statusProvidingEntity); ok {
+		status, err := spe.statusFromResponse(resp)
+		if err != nil {
+			return nil, err
+		}
+
+		return status, nil
 	}
 
-	return status, nil
+	return &Status{Status: successfulStatus}, nil
 }
