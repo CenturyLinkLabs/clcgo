@@ -9,10 +9,10 @@ import (
 
 func TestWorkingDataCentersURL(t *testing.T) {
 	d := DataCenters{}
-	u, err := d.URL("AA")
+	u, err := d.url("AA")
 
 	assert.NoError(t, err)
-	assert.Equal(t, APIRoot+"/datacenters/AA", u)
+	assert.Equal(t, apiRoot+"/datacenters/AA", u)
 }
 
 func TestDataCenterJSONUnmarshalling(t *testing.T) {
@@ -30,15 +30,15 @@ func TestDataCenterJSONUnmarshalling(t *testing.T) {
 
 func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{DataCenter: DataCenter{ID: "abc123"}}
-	u, err := d.URL("AA")
+	u, err := d.url("AA")
 
 	assert.NoError(t, err)
-	assert.Equal(t, APIRoot+"/datacenters/AA/abc123/deploymentCapabilities", u)
+	assert.Equal(t, apiRoot+"/datacenters/AA/abc123/deploymentCapabilities", u)
 }
 
 func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{}
-	_, err := d.URL("AA")
+	_, err := d.url("AA")
 	assert.EqualError(t, err, "Need a DataCenter with an ID")
 }
 

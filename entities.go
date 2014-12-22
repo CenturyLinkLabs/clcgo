@@ -2,8 +2,15 @@ package clcgo
 
 import "encoding/json"
 
-type Entity interface {
-	URL(string) (string, error)
+const (
+	apiDomain = "https://api.tier3.com"
+	apiRoot   = apiDomain + "/v2"
+)
+
+// TODO Document this for this library's developers? Is there a flag to get it
+// to not publish in GoDoc?
+type entity interface {
+	url(string) (string, error)
 }
 
 type Status struct {
@@ -11,8 +18,8 @@ type Status struct {
 	URI    string
 }
 
-func (s Status) URL(a string) (string, error) {
-	return APIDomain + s.URI, nil
+func (s Status) url(a string) (string, error) {
+	return apiDomain + s.URI, nil
 }
 
 func (s Status) HasSucceeded() bool {
@@ -25,21 +32,16 @@ type Link struct {
 	HRef string `json:"href"`
 }
 
-const (
-	APIDomain = "https://api.tier3.com"
-	APIRoot   = APIDomain + "/v2"
-)
-
-func GetEntity(c Credentials, e Entity) error {
+func GetEntity(c Credentials, e entity) error {
 	return getEntity(&clcRequestor{}, c, e)
 }
 
-func getEntity(r Requestor, c Credentials, e Entity) error {
-	url, err := e.URL(c.AccountAlias)
+func getEntity(r requestor, c Credentials, e entity) error {
+	url, err := e.url(c.AccountAlias)
 	if err != nil {
 		return err
 	}
-	j, err := r.GetJSON(c.BearerToken, Request{URL: url})
+	j, err := r.GetJSON(c.BearerToken, request{URL: url})
 	if err != nil {
 		return err
 	}

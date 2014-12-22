@@ -9,7 +9,7 @@ import (
 func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 	r := newTestRequestor()
 
-	r.registerHandler("POST", AuthenticationURL, func(token string, req Request) (string, error) {
+	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
 		parameters, ok := req.Parameters.(authParameters)
 		assert.True(t, ok)
 		assert.Empty(t, token)
@@ -27,7 +27,7 @@ func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 func TestFetchCredentialsWithBadCredentials(t *testing.T) {
 	r := newTestRequestor()
 
-	r.registerHandler("POST", AuthenticationURL, func(token string, req Request) (string, error) {
+	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
 		err := RequestError{Message: "There was a problem with the request", StatusCode: 400}
 		return "Bad Request", err
 	})

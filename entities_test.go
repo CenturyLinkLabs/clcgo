@@ -13,10 +13,10 @@ import (
 func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	id := "abc123"
-	url := fmt.Sprintf(ServerURL, "AA", id)
+	url := fmt.Sprintf(serverURL, "AA", id)
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 
-	r.registerHandler("GET", url, func(token string, req Request) (string, error) {
+	r.registerHandler("GET", url, func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
 		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
 	})
@@ -33,7 +33,7 @@ func TestErroredURLInGetEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	err := getEntity(&r, c, &s)
 
-	_, e := s.URL("abc123")
+	_, e := s.url("abc123")
 	assert.EqualError(t, err, e.Error())
 }
 
@@ -43,7 +43,7 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	s := Server{ID: id}
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	err := getEntity(r, c, &s)
-	url := fmt.Sprintf(ServerURL, "AA", id)
+	url := fmt.Sprintf(serverURL, "AA", id)
 
 	assert.EqualError(t, err, fmt.Sprintf("There is no handler for GET '%s'", url))
 }
@@ -51,9 +51,9 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	id := "abc123"
-	url := fmt.Sprintf(ServerURL, "AA", id)
+	url := fmt.Sprintf(serverURL, "AA", id)
 
-	r.registerHandler("GET", url, func(token string, req Request) (string, error) {
+	r.registerHandler("GET", url, func(token string, req request) (string, error) {
 		return ``, nil
 	})
 
@@ -66,9 +66,9 @@ func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 
 func TestStatusURL(t *testing.T) {
 	s := Status{URI: "/v2/status/1234"}
-	url, err := s.URL("AA")
+	url, err := s.url("AA")
 	assert.NoError(t, err)
-	assert.Equal(t, APIDomain+"/v2/status/1234", url)
+	assert.Equal(t, apiDomain+"/v2/status/1234", url)
 }
 
 func TestStatusHasSucceeded(t *testing.T) {

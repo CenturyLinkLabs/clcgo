@@ -33,7 +33,7 @@ func TestSuccessfulUnauthenticatedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	req := request{URL: ts.URL, Parameters: testParameters{"Testing"}}
 	response, err := r.PostJSON("", req)
 	assert.NoError(t, err)
 
@@ -49,7 +49,7 @@ func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	req := request{URL: ts.URL, Parameters: testParameters{}}
 	_, err := r.PostJSON("token", req)
 	assert.NoError(t, err)
 }
@@ -61,7 +61,7 @@ func TestUnauthorizedPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	req := request{URL: ts.URL, Parameters: testParameters{}}
 	_, err := r.PostJSON("token", req)
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
@@ -77,7 +77,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	req := Request{URL: ts.URL, Parameters: testParameters{"Testing"}}
+	req := request{URL: ts.URL, Parameters: testParameters{"Testing"}}
 	response, err := r.PostJSON("", req)
 	assert.Contains(t, string(response), "I'm a teapot")
 
@@ -95,7 +95,7 @@ func Test400WithMessagesOnPostJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	req := Request{URL: ts.URL, Parameters: testParameters{}}
+	req := request{URL: ts.URL, Parameters: testParameters{}}
 	_, err := r.PostJSON("token", req)
 
 	reqErr, ok := err.(RequestError)
@@ -123,7 +123,7 @@ func TestSuccessfulGetJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	response, err := r.GetJSON("token", Request{URL: ts.URL})
+	response, err := r.GetJSON("token", request{URL: ts.URL})
 	assert.NoError(t, err)
 	assert.Equal(t, "Response Text", string(response))
 }
@@ -135,7 +135,7 @@ func TestUnauthorizedGetJSON(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	_, err := r.GetJSON("token", Request{URL: ts.URL})
+	_, err := r.GetJSON("token", request{URL: ts.URL})
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
 		assert.EqualError(t, reqErr, "Your bearer token was rejected")
@@ -150,7 +150,7 @@ func TestErrored400GetJson(t *testing.T) {
 	defer ts.Close()
 
 	r := &clcRequestor{}
-	response, err := r.GetJSON("token", Request{URL: ts.URL})
+	response, err := r.GetJSON("token", request{URL: ts.URL})
 	assert.Contains(t, string(response), "Bad Request")
 
 	reqErr, ok := err.(RequestError)

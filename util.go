@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-type Requestor interface {
-	PostJSON(string, Request) ([]byte, error)
-	GetJSON(string, Request) ([]byte, error)
+type requestor interface {
+	PostJSON(string, request) ([]byte, error)
+	GetJSON(string, request) ([]byte, error)
 }
 
 type clcRequestor struct{}
@@ -32,7 +32,7 @@ func (r RequestError) Error() string {
 	return r.Message
 }
 
-func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
+func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 	j, err := json.Marshal(req.Parameters)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (r clcRequestor) PostJSON(t string, req Request) ([]byte, error) {
 	}
 }
 
-func (r clcRequestor) GetJSON(t string, req Request) ([]byte, error) {
+func (r clcRequestor) GetJSON(t string, req request) ([]byte, error) {
 	client := http.Client{}
 
 	hr, err := http.NewRequest("GET", req.URL, nil)

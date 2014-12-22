@@ -8,7 +8,7 @@ import (
 )
 
 type testSavable struct {
-	CallbackForRequest func(string) (Request, error)
+	CallbackForRequest func(string) (request, error)
 	CallbackForStatus  func([]byte) (*Status, error)
 }
 
@@ -16,18 +16,18 @@ type savableCreationParameters struct {
 	Value string
 }
 
-func (s testSavable) RequestForSave(a string) (Request, error) {
+func (s testSavable) requestForSave(a string) (request, error) {
 	if s.CallbackForRequest != nil {
 		return s.CallbackForRequest(a)
 	}
 
-	return Request{
+	return request{
 		URL:        "/server/creation/url",
 		Parameters: savableCreationParameters{Value: "testSavable"},
 	}, nil
 }
 
-func (s testSavable) StatusFromResponse(r []byte) (*Status, error) {
+func (s testSavable) statusFromResponse(r []byte) (*Status, error) {
 	if s.CallbackForStatus != nil {
 		return s.CallbackForStatus(r)
 	}
@@ -41,9 +41,9 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 	p := savableCreationParameters{Value: "testSavable"}
 	st := &Status{}
 	s := testSavable{
-		CallbackForRequest: func(a string) (Request, error) {
+		CallbackForRequest: func(a string) (request, error) {
 			assert.Equal(t, "AA", a)
-			return Request{URL: "/servers", Parameters: p}, nil
+			return request{URL: "/servers", Parameters: p}, nil
 		},
 		CallbackForStatus: func(r []byte) (*Status, error) {
 			assert.Equal(t, []byte(serverCreationSuccessfulResponse), r)
@@ -51,7 +51,7 @@ func TestSuccessfulSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("POST", "/servers", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/servers", func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
 		assert.Equal(t, p, req.Parameters)
 
@@ -67,8 +67,8 @@ func TestErroredRequestSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{
-		CallbackForRequest: func(a string) (Request, error) {
-			return Request{}, errors.New("Test Request Error")
+		CallbackForRequest: func(a string) (request, error) {
+			return request{}, errors.New("Test Request Error")
 		},
 	}
 
@@ -82,7 +82,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{}
 
-	r.registerHandler("POST", "/server/creation/url", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
 		return "", errors.New("Error from PostJSON")
 	})
 
@@ -100,7 +100,7 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("POST", "/server/creation/url", func(token string, req Request) (string, error) {
+	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
 		return "response", nil
 	})
 

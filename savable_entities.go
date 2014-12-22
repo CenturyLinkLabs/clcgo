@@ -1,21 +1,21 @@
 package clcgo
 
-type Request struct {
+type request struct {
 	URL        string
 	Parameters interface{}
 }
 
-type SavableEntity interface {
-	RequestForSave(string) (Request, error)
-	StatusFromResponse([]byte) (*Status, error)
+type savableEntity interface {
+	requestForSave(string) (request, error)
+	statusFromResponse([]byte) (*Status, error)
 }
 
-func SaveEntity(c Credentials, e SavableEntity) (*Status, error) {
+func SaveEntity(c Credentials, e savableEntity) (*Status, error) {
 	return saveEntity(clcRequestor{}, c, e)
 }
 
-func saveEntity(r Requestor, c Credentials, e SavableEntity) (*Status, error) {
-	req, err := e.RequestForSave(c.AccountAlias)
+func saveEntity(r requestor, c Credentials, e savableEntity) (*Status, error) {
+	req, err := e.requestForSave(c.AccountAlias)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func saveEntity(r Requestor, c Credentials, e SavableEntity) (*Status, error) {
 	if err != nil {
 		return nil, err
 	}
-	status, err := e.StatusFromResponse(resp)
+	status, err := e.statusFromResponse(resp)
 	if err != nil {
 		return nil, err
 	}

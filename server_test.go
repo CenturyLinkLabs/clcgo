@@ -14,7 +14,7 @@ func TestImplementations(t *testing.T) {
 		new(Status),
 	}
 	for _, e := range es {
-		assert.Implements(t, (*Entity)(nil), e)
+		assert.Implements(t, (*entity)(nil), e)
 	}
 
 	ses := []interface{}{
@@ -22,7 +22,7 @@ func TestImplementations(t *testing.T) {
 		new(PublicIPAddress),
 	}
 	for _, se := range ses {
-		assert.Implements(t, (*SavableEntity)(nil), se)
+		assert.Implements(t, (*savableEntity)(nil), se)
 	}
 }
 
@@ -40,23 +40,23 @@ func TestServerJSONUnmarshalling(t *testing.T) {
 
 func TestWorkingServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
-	u, err := s.URL("AA")
+	u, err := s.url("AA")
 
 	assert.NoError(t, err)
-	assert.Equal(t, APIRoot+"/servers/AA/abc123", u)
+	assert.Equal(t, apiRoot+"/servers/AA/abc123", u)
 }
 
 func TestErroredServerURL(t *testing.T) {
-	u, err := Server{}.URL("AA")
+	u, err := Server{}.url("AA")
 
 	assert.EqualError(t, err, "An ID field is required to get a server")
 	assert.Empty(t, u)
 }
 
 func TestURLMissingIDHavingUUID(t *testing.T) {
-	u, err := Server{uuidURI: "/v2/alias/1234?uuid=true"}.URL("AA")
+	u, err := Server{uuidURI: "/v2/alias/1234?uuid=true"}.url("AA")
 	assert.NoError(t, err)
-	assert.Equal(t, APIDomain+"/v2/alias/1234?uuid=true", u)
+	assert.Equal(t, apiDomain+"/v2/alias/1234?uuid=true", u)
 }
 
 func TestServerRequestForSave(t *testing.T) {
@@ -65,28 +65,28 @@ func TestServerRequestForSave(t *testing.T) {
 		GroupID:        "1234IL",
 		SourceServerID: "TestID",
 	}
-	req, err := s.RequestForSave("AA")
+	req, err := s.requestForSave("AA")
 	assert.NoError(t, err)
-	assert.Equal(t, APIRoot+"/servers/AA", req.URL)
+	assert.Equal(t, apiRoot+"/servers/AA", req.URL)
 	assert.Equal(t, s, req.Parameters)
 }
 
 func TestErroredServerRequestForSave(t *testing.T) {
-	p, err := Server{}.RequestForSave("AA")
-	assert.Equal(t, Request{}, p)
+	p, err := Server{}.requestForSave("AA")
+	assert.Equal(t, request{}, p)
 	assert.EqualError(t, err, "The following fields are required to save: Name, GroupID, SourceServerID")
 }
 
 func TestSuccessfulStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.StatusFromResponse([]byte(serverCreationSuccessfulResponse))
+	s, err := srv.statusFromResponse([]byte(serverCreationSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }
 
 func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.StatusFromResponse([]byte(serverCreationMissingStatusResponse))
+	s, err := srv.statusFromResponse([]byte(serverCreationMissingStatusResponse))
 	assert.Nil(t, s)
 	assert.EqualError(t, err, "The creation response has no status link")
 }
@@ -95,25 +95,25 @@ func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
 	s := Server{ID: "1234il"}
 	ps := []Port{Port{Protocol: "TCP", Port: 31981}}
 	i := PublicIPAddress{Server: s, Ports: ps}
-	req, err := i.RequestForSave("AA")
+	req, err := i.requestForSave("AA")
 
 	assert.NoError(t, err)
-	assert.Equal(t, APIDomain+"/v2/servers/AA/1234il/publicIPAddresses", req.URL)
+	assert.Equal(t, apiDomain+"/v2/servers/AA/1234il/publicIPAddresses", req.URL)
 	assert.Equal(t, i, req.Parameters)
 }
 
 func TestErroredIPAddressResponseForSave(t *testing.T) {
 	s := Server{}
 	i := PublicIPAddress{Server: s}
-	req, err := i.RequestForSave("AA")
+	req, err := i.requestForSave("AA")
 
-	assert.Equal(t, Request{}, req)
+	assert.Equal(t, request{}, req)
 	assert.EqualError(t, err, "A Server with an ID is required to add a Public IP Address")
 }
 
 func TestIPAddressStatusFromResponse(t *testing.T) {
 	i := PublicIPAddress{}
-	s, err := i.StatusFromResponse([]byte(addPublicIPAddressSuccessfulResponse))
+	s, err := i.statusFromResponse([]byte(addPublicIPAddressSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }

@@ -5,17 +5,16 @@ import (
 	"fmt"
 )
 
+const (
+	dataCentersURL            = apiRoot + "/datacenters/%s"
+	dataCenterCapabilitiesURL = dataCentersURL + "/%s/deploymentCapabilities"
+)
+
 type DataCenters []DataCenter
 
 type DataCenter struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-}
-
-const DataCentersURL = APIRoot + "/datacenters/%s"
-
-func (d DataCenters) URL(a string) (string, error) {
-	return fmt.Sprintf(DataCentersURL, a), nil
 }
 
 type DataCenterCapabilities struct {
@@ -26,12 +25,14 @@ type DataCenterCapabilities struct {
 	}
 }
 
-const DataCenterCapabilitiesURL = DataCentersURL + "/%s/deploymentCapabilities"
+func (d DataCenters) url(a string) (string, error) {
+	return fmt.Sprintf(dataCentersURL, a), nil
+}
 
-func (d DataCenterCapabilities) URL(a string) (string, error) {
+func (d DataCenterCapabilities) url(a string) (string, error) {
 	if d.DataCenter.ID == "" {
 		return "", errors.New("Need a DataCenter with an ID")
 	}
 
-	return fmt.Sprintf(DataCenterCapabilitiesURL, a, d.DataCenter.ID), nil
+	return fmt.Sprintf(dataCenterCapabilitiesURL, a, d.DataCenter.ID), nil
 }

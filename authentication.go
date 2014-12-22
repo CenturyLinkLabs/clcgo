@@ -15,15 +15,15 @@ type authParameters struct {
 	Password string
 }
 
-const AuthenticationURL = "https://api.tier3.com/v2/authentication/login"
+const authenticationURL = "https://api.tier3.com/v2/authentication/login"
 
 func FetchCredentials(username string, password string) (Credentials, error) {
 	return fetchCredentials(&clcRequestor{}, username, password)
 }
 
-func fetchCredentials(client Requestor, username string, password string) (Credentials, error) {
-	req := Request{
-		URL:        AuthenticationURL,
+func fetchCredentials(client requestor, username string, password string) (Credentials, error) {
+	req := request{
+		URL:        authenticationURL,
 		Parameters: authParameters{username, password},
 	}
 	response, err := client.PostJSON("", req)

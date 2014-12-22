@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	ServerCreationURL  = APIRoot + "/servers/%s"
-	ServerURL          = ServerCreationURL + "/%s"
-	PublicIPAddressURL = ServerURL + "/publicIPAddresses"
+	serverCreationURL  = apiRoot + "/servers/%s"
+	serverURL          = serverCreationURL + "/%s"
+	publicIPAddressURL = serverURL + "/publicIPAddresses"
 )
 
 type Server struct {
@@ -43,31 +43,32 @@ type Port struct {
 	Port     int    `json:"port"`
 }
 
-func (s Server) URL(a string) (string, error) {
+func (s Server) url(a string) (string, error) {
 	if s.ID == "" && s.uuidURI == "" {
 		return "", errors.New("An ID field is required to get a server")
 	} else if s.uuidURI != "" {
-		return APIDomain + s.uuidURI, nil
+		return apiDomain + s.uuidURI, nil
 	}
 
-	return fmt.Sprintf(ServerURL, a, s.ID), nil
+	return fmt.Sprintf(serverURL, a, s.ID), nil
 }
 
-func (s Server) RequestForSave(a string) (Request, error) {
-	url := fmt.Sprintf(ServerCreationURL, a)
+func (s Server) requestForSave(a string) (request, error) {
+	url := fmt.Sprintf(serverCreationURL, a)
 	p, err := s.parametersForSave()
 	if err != nil {
-		return Request{}, err
+		return request{}, err
 	}
 
-	return Request{URL: url, Parameters: p}, nil
+	return request{URL: url, Parameters: p}, nil
 }
 
+// BUG(dp): A combination of long AccountAlias and Name can be invalid. We need
+// to decide whether this is worth verifying here or not.
+// BUG(dp): There are additional fields that are also required. We need to
+// decide how much verification is worthwhile. Those fields are CPU, MemoryGB,
+// and Type.
 func (s Server) parametersForSave() (interface{}, error) {
-	// TODO Freak out when the combo of AccountAlias and Name is too long! Which
-	// is programatically defined and I don't have the rules.
-	// TODO Well, actually.... CPU, MemoryGB, and Type are required, too! Those
-	// are good candidates for defaults, though.
 	f := []string{s.GroupID, s.Name, s.SourceServerID}
 	for _, v := range f {
 		if v == "" {
@@ -80,7 +81,7 @@ func (s Server) parametersForSave() (interface{}, error) {
 	return s, nil
 }
 
-func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
+func (s *Server) statusFromResponse(r []byte) (*Status, error) {
 	scr := serverCreationResponse{}
 	err := json.Unmarshal(r, &scr)
 	if err != nil {
@@ -102,16 +103,16 @@ func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 	return &Status{URI: sl.HRef}, nil
 }
 
-func (i PublicIPAddress) RequestForSave(a string) (Request, error) {
+func (i PublicIPAddress) requestForSave(a string) (request, error) {
 	if i.Server.ID == "" {
-		return Request{}, errors.New("A Server with an ID is required to add a Public IP Address")
+		return request{}, errors.New("A Server with an ID is required to add a Public IP Address")
 	}
 
-	url := fmt.Sprintf(PublicIPAddressURL, a, i.Server.ID)
-	return Request{URL: url, Parameters: i}, nil
+	url := fmt.Sprintf(publicIPAddressURL, a, i.Server.ID)
+	return request{URL: url, Parameters: i}, nil
 }
 
-func (i PublicIPAddress) StatusFromResponse(r []byte) (*Status, error) {
+func (i PublicIPAddress) statusFromResponse(r []byte) (*Status, error) {
 	l := Link{}
 	err := json.Unmarshal(r, &l)
 	if err != nil {
