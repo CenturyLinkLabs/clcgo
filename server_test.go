@@ -71,12 +71,6 @@ func TestServerRequestForSave(t *testing.T) {
 	assert.Equal(t, s, req.Parameters)
 }
 
-func TestErroredServerRequestForSave(t *testing.T) {
-	p, err := Server{}.requestForSave("AA")
-	assert.Equal(t, request{}, p)
-	assert.EqualError(t, err, "The following fields are required to save: Name, GroupID, SourceServerID")
-}
-
 func TestSuccessfulStatusFromResponse(t *testing.T) {
 	srv := Server{}
 	s, err := srv.statusFromResponse([]byte(serverCreationSuccessfulResponse))

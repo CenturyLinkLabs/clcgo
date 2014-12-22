@@ -55,30 +55,7 @@ func (s Server) url(a string) (string, error) {
 
 func (s Server) requestForSave(a string) (request, error) {
 	url := fmt.Sprintf(serverCreationURL, a)
-	p, err := s.parametersForSave()
-	if err != nil {
-		return request{}, err
-	}
-
-	return request{URL: url, Parameters: p}, nil
-}
-
-// BUG(dp): A combination of long AccountAlias and Name can be invalid. We need
-// to decide whether this is worth verifying here or not.
-// BUG(dp): There are additional fields that are also required. We need to
-// decide how much verification is worthwhile. Those fields are CPU, MemoryGB,
-// and Type.
-func (s Server) parametersForSave() (interface{}, error) {
-	f := []string{s.GroupID, s.Name, s.SourceServerID}
-	for _, v := range f {
-		if v == "" {
-			return nil, errors.New(
-				"The following fields are required to save: Name, GroupID, SourceServerID",
-			)
-		}
-	}
-
-	return s, nil
+	return request{URL: url, Parameters: s}, nil
 }
 
 func (s *Server) statusFromResponse(r []byte) (*Status, error) {
