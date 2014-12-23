@@ -1,33 +1,27 @@
 package clcgo
 
-import (
-	"encoding/json"
-	"errors"
-)
+import "errors"
+
+const authenticationURL = apiRoot + "/authentication/login"
 
 type Credentials struct {
-	BearerToken  string
-	AccountAlias string
+	BearerToken  string `json:"bearerToken"`
+	AccountAlias string `json:"accountAlias"`
+	Username     string `json:"username"` // TODO: nonexistant in get, extract to creation params?
+	Password     string `json:"password"` // TODO: nonexistant in get, extract to creation params?
 }
 
-type authParameters struct {
-	Username string
-	Password string
+func (c Credentials) requestForSave(a string) (request, error) {
+	return request{URL: authenticationURL, Parameters: c}, nil
 }
 
-const authenticationURL = "https://api.tier3.com/v2/authentication/login"
-
-func FetchCredentials(username string, password string) (Credentials, error) {
-	return fetchCredentials(&clcRequestor{}, username, password)
+func FetchCredentials(u string, p string) (Credentials, error) {
+	return fetchCredentials(&clcRequestor{}, u, p)
 }
 
-func fetchCredentials(client requestor, username string, password string) (Credentials, error) {
-	req := request{
-		URL:        authenticationURL,
-		Parameters: authParameters{username, password},
-	}
-	response, err := client.PostJSON("", req)
-
+func fetchCredentials(r requestor, u string, p string) (Credentials, error) {
+	c := Credentials{Username: u, Password: p}
+	_, err := saveEntity(r, c, &c)
 	if err != nil {
 		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
 			err = errors.New("There was a problem with your credentials")
@@ -36,7 +30,5 @@ func fetchCredentials(client requestor, username string, password string) (Crede
 		return Credentials{}, err
 	}
 
-	var credentials Credentials
-	json.Unmarshal(response, &credentials)
-	return credentials, nil
+	return c, nil
 }

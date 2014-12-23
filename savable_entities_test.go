@@ -7,8 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var creationResponse = `{"testKey":"value"}`
+
 type testSavable struct {
 	CallbackForRequest func(string) (request, error)
+	TestKey            string
 }
 
 type testStatusProviding struct {
@@ -25,14 +28,14 @@ func (s testSavable) requestForSave(a string) (request, error) {
 	}
 
 	return request{
-		URL:        "/server/creation/url",
+		URL:        "/creation/url",
 		Parameters: savableCreationParameters{Value: "testSavable"},
 	}, nil
 }
 
 func (s testStatusProviding) requestForSave(a string) (request, error) {
 	return request{
-		URL:        "/server/creation/url",
+		URL:        "/creation/url",
 		Parameters: savableCreationParameters{Value: "testSavable"},
 	}, nil
 }
@@ -48,20 +51,21 @@ func TestSuccessfulSavableSaveEntity(t *testing.T) {
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
 			assert.Equal(t, "AA", a)
-			return request{URL: "/servers", Parameters: p}, nil
+			return request{URL: "/savable", Parameters: p}, nil
 		},
 	}
 
-	r.registerHandler("POST", "/servers", func(token string, req request) (string, error) {
+	r.registerHandler("POST", "/savable", func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
 		assert.Equal(t, p, req.Parameters)
 
-		return serverCreationSuccessfulResponse, nil
+		return creationResponse, nil
 	})
 
 	status, err := saveEntity(r, c, &s)
 	assert.NoError(t, err)
 	assert.True(t, status.HasSucceeded())
+	assert.Equal(t, "value", s.TestKey)
 }
 
 func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
@@ -70,13 +74,13 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 	st := &Status{}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
-			assert.Equal(t, []byte(serverCreationSuccessfulResponse), r)
+			assert.Equal(t, []byte(creationResponse), r)
 			return st, nil
 		},
 	}
 
-	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
-		return serverCreationSuccessfulResponse, nil
+	r.registerHandler("POST", "/creation/url", func(token string, req request) (string, error) {
+		return creationResponse, nil
 	})
 
 	status, err := saveEntity(r, c, &s)
@@ -103,7 +107,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	c := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	s := testSavable{}
 
-	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
+	r.registerHandler("POST", "/creation/url", func(token string, req request) (string, error) {
 		return "", errors.New("Error from PostJSON")
 	})
 
@@ -121,7 +125,7 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 		},
 	}
 
-	r.registerHandler("POST", "/server/creation/url", func(token string, req request) (string, error) {
+	r.registerHandler("POST", "/creation/url", func(token string, req request) (string, error) {
 		return "response", nil
 	})
 

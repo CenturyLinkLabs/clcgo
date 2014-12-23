@@ -10,11 +10,11 @@ func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 	r := newTestRequestor()
 
 	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
-		parameters, ok := req.Parameters.(authParameters)
+		c, ok := req.Parameters.(Credentials)
 		assert.True(t, ok)
 		assert.Empty(t, token)
-		assert.Equal(t, "username", parameters.Username)
-		assert.Equal(t, "password", parameters.Password)
+		assert.Equal(t, "username", c.Username)
+		assert.Equal(t, "password", c.Password)
 
 		return `{"bearerToken":"expected token"}`, nil
 	})

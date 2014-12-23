@@ -1,5 +1,7 @@
 package clcgo
 
+import "encoding/json"
+
 type request struct {
 	URL        string
 	Parameters interface{}
@@ -36,5 +38,6 @@ func saveEntity(r requestor, c Credentials, e savableEntity) (*Status, error) {
 		return status, nil
 	}
 
+	json.Unmarshal(resp, &e)
 	return &Status{Status: successfulStatus}, nil
 }
