@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var creationResponse = `{"testKey":"value"}`
+var creationResponse = `{"testSerializedKey":"value"}`
 
 type testSavable struct {
 	CallbackForRequest func(string) (request, error)
-	TestKey            string
+	TestSerializedKey  string `json:"testSerializedKey"`
 }
 
 type testStatusProviding struct {
@@ -66,7 +66,7 @@ func TestSuccessfulSavableSaveEntity(t *testing.T) {
 	status, err := c.saveEntity(r, &s)
 	assert.NoError(t, err)
 	assert.True(t, status.HasSucceeded())
-	assert.Equal(t, "value", s.TestKey)
+	assert.Equal(t, "value", s.TestSerializedKey)
 }
 
 func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {

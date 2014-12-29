@@ -1,69 +1,85 @@
 package clcgo
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO look at implementing a testEntity like is done with testSavable in the
-// savable_entities_test.
+var entityResponse = `{"testSerializedKey":"value"}`
+
+type testEntity struct {
+	CallbackForURL    func(string) (string, error)
+	TestSerializedKey string `json:"testSerializedKey"`
+}
+
+func (e testEntity) url(a string) (string, error) {
+	if e.CallbackForURL != nil {
+		return e.CallbackForURL(a)
+	}
+
+	return "/entity/url", nil
+}
 
 func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	id := "abc123"
-	url := fmt.Sprintf(serverURL, "AA", id)
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	c := ClientFromCredentials(cr)
 
-	r.registerHandler("GET", url, func(token string, req request) (string, error) {
+	r.registerHandler("GET", "/entity", func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
-		return fmt.Sprintf(`{"name": "testname", "id": "%s"}`, id), nil
+		return entityResponse, nil
 	})
 
-	s := Server{ID: id}
-	err := c.getEntity(r, &s)
+	e := testEntity{
+		CallbackForURL: func(a string) (string, error) {
+			assert.Equal(t, "AA", a)
+			return "/entity", nil
+		},
+	}
+
+	err := c.getEntity(r, &e)
 	assert.NoError(t, err)
-	assert.Equal(t, "testname", s.Name)
+	assert.Equal(t, "value", e.TestSerializedKey)
 }
 
 func TestErroredURLInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	s := Server{}
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	c := ClientFromCredentials(cr)
-	err := c.getEntity(&r, &s)
+	e := testEntity{
+		CallbackForURL: func(a string) (string, error) {
+			return "", errors.New("Test URL Error")
+		},
+	}
 
-	_, e := s.url("abc123")
-	assert.EqualError(t, err, e.Error())
+	err := c.getEntity(&r, &e)
+	assert.EqualError(t, err, "Test URL Error")
 }
 
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	id := "abc123"
-	s := Server{ID: id}
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
 	c := ClientFromCredentials(cr)
-	err := c.getEntity(r, &s)
-	url := fmt.Sprintf(serverURL, "AA", id)
+	e := testEntity{}
+	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
+		return "", errors.New("Error from GetJSON")
+	})
 
-	assert.EqualError(t, err, fmt.Sprintf("There is no handler for GET '%s'", url))
+	err := c.getEntity(r, &e)
+	assert.EqualError(t, err, "Error from GetJSON")
 }
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	id := "abc123"
-	url := fmt.Sprintf(serverURL, "AA", id)
-
-	r.registerHandler("GET", url, func(token string, req request) (string, error) {
+	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
+	c := ClientFromCredentials(cr)
+	e := testEntity{}
+	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
 		return ``, nil
 	})
 
-	s := Server{ID: id}
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
-	err := c.getEntity(r, &s)
-
+	err := c.getEntity(r, &e)
 	assert.EqualError(t, err, "unexpected end of JSON input")
 }
