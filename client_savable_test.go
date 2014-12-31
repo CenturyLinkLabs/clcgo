@@ -47,7 +47,7 @@ func (s testStatusProviding) statusFromResponse(r []byte) (*Status, error) {
 func TestSuccessfulSavableSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	p := savableCreationParameters{Value: "testSavable"}
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
@@ -63,7 +63,7 @@ func TestSuccessfulSavableSaveEntity(t *testing.T) {
 		return creationResponse, nil
 	})
 
-	status, err := c.saveEntity(r, &s)
+	status, err := c.SaveEntity(&s)
 	assert.NoError(t, err)
 	assert.True(t, status.HasSucceeded())
 	assert.Equal(t, "value", s.TestSerializedKey)
@@ -72,7 +72,7 @@ func TestSuccessfulSavableSaveEntity(t *testing.T) {
 func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	st := &Status{}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
@@ -85,7 +85,7 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 		return creationResponse, nil
 	})
 
-	status, err := c.saveEntity(r, &s)
+	status, err := c.SaveEntity(&s)
 	assert.NoError(t, err)
 	assert.Equal(t, st, status)
 }
@@ -93,14 +93,14 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 func TestErroredRequestSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
 			return request{}, errors.New("Test Request Error")
 		},
 	}
 
-	status, err := c.saveEntity(r, &s)
+	status, err := c.SaveEntity(&s)
 	assert.Nil(t, status)
 	assert.EqualError(t, err, "Test Request Error")
 }
@@ -108,14 +108,14 @@ func TestErroredRequestSaveEntity(t *testing.T) {
 func TestErroredPostJSONSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	s := testSavable{}
 
 	r.registerHandler("POST", "/creation/url", func(token string, req request) (string, error) {
 		return "", errors.New("Error from PostJSON")
 	})
 
-	status, err := c.saveEntity(r, &s)
+	status, err := c.SaveEntity(&s)
 	assert.Nil(t, status)
 	assert.EqualError(t, err, "Error from PostJSON")
 }
@@ -123,7 +123,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 func TestErorredStatusSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
 			return nil, errors.New("Test Status Error")
@@ -134,7 +134,7 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 		return "response", nil
 	})
 
-	status, err := c.saveEntity(r, &s)
+	status, err := c.SaveEntity(&s)
 	assert.Nil(t, status)
 	assert.EqualError(t, err, "Test Status Error")
 }

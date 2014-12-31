@@ -1,25 +1,52 @@
 package clcgo
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
+
+const authenticationURL = apiRoot + "/authentication/login"
+
+type Credentials struct {
+	BearerToken  string `json:"bearerToken"`
+	AccountAlias string `json:"accountAlias"`
+	Username     string `json:"username"` // TODO: nonexistant in get, extract to creation params?
+	Password     string `json:"password"` // TODO: nonexistant in get, extract to creation params?
+}
 
 type Client struct {
 	Credentials Credentials
+	Requestor   requestor
 }
 
-func ClientFromCredentials(c Credentials) *Client {
-	return &Client{Credentials: c}
+func (c Credentials) requestForSave(a string) (request, error) {
+	return request{URL: authenticationURL, Parameters: c}, nil
+}
+
+func NewClient() *Client {
+	return &Client{Requestor: clcRequestor{}}
+}
+
+func (c *Client) GetCredentials(u string, p string) error {
+	c.Credentials = Credentials{Username: u, Password: p}
+	_, err := c.SaveEntity(&c.Credentials)
+	if err != nil {
+		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
+			err = errors.New("There was a problem with your credentials")
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) GetEntity(e entity) error {
-	return c.getEntity(&clcRequestor{}, e)
-}
-
-func (c *Client) getEntity(r requestor, e entity) error {
 	url, err := e.url(c.Credentials.AccountAlias)
 	if err != nil {
 		return err
 	}
-	j, err := r.GetJSON(c.Credentials.BearerToken, request{URL: url})
+	j, err := c.Requestor.GetJSON(c.Credentials.BearerToken, request{URL: url})
 	if err != nil {
 		return err
 	}
@@ -28,15 +55,11 @@ func (c *Client) getEntity(r requestor, e entity) error {
 }
 
 func (c *Client) SaveEntity(e savableEntity) (*Status, error) {
-	return c.saveEntity(clcRequestor{}, e)
-}
-
-func (c *Client) saveEntity(r requestor, e savableEntity) (*Status, error) {
 	req, err := e.requestForSave(c.Credentials.AccountAlias)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := r.PostJSON(c.Credentials.BearerToken, req)
+	resp, err := c.Requestor.PostJSON(c.Credentials.BearerToken, req)
 	if err != nil {
 		return nil, err
 	}

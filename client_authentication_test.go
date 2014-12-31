@@ -6,8 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
+func TestSuccessfulGetCredentials(t *testing.T) {
 	r := newTestRequestor()
+	c := Client{Requestor: r}
 
 	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
 		c, ok := req.Parameters.(Credentials)
@@ -19,20 +20,21 @@ func TestFetchCredentialsWithGoodCredentials(t *testing.T) {
 		return `{"bearerToken":"expected token"}`, nil
 	})
 
-	credentials, err := fetchCredentials(&r, "username", "password")
+	err := c.GetCredentials("username", "password")
 	assert.NoError(t, err)
-	assert.Equal(t, "expected token", credentials.BearerToken)
+	assert.Equal(t, "expected token", c.Credentials.BearerToken)
 }
 
-func TestFetchCredentialsWithBadCredentials(t *testing.T) {
+func TestErorredGetCredentials(t *testing.T) {
 	r := newTestRequestor()
+	c := Client{Requestor: r}
 
 	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
 		err := RequestError{Message: "There was a problem with the request", StatusCode: 400}
 		return "Bad Request", err
 	})
 
-	credentials, err := fetchCredentials(&r, "username", "password")
+	err := c.GetCredentials("username", "password")
 	assert.EqualError(t, err, "There was a problem with your credentials")
-	assert.Equal(t, Credentials{}, credentials)
+	assert.Empty(t, c.Credentials.BearerToken)
 }

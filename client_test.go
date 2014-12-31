@@ -25,7 +25,7 @@ func (e testEntity) url(a string) (string, error) {
 func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 
 	r.registerHandler("GET", "/entity", func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
@@ -39,7 +39,7 @@ func TestSuccessfulGetEntity(t *testing.T) {
 		},
 	}
 
-	err := c.getEntity(r, &e)
+	err := c.GetEntity(&e)
 	assert.NoError(t, err)
 	assert.Equal(t, "value", e.TestSerializedKey)
 }
@@ -47,39 +47,39 @@ func TestSuccessfulGetEntity(t *testing.T) {
 func TestErroredURLInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	e := testEntity{
 		CallbackForURL: func(a string) (string, error) {
 			return "", errors.New("Test URL Error")
 		},
 	}
 
-	err := c.getEntity(&r, &e)
+	err := c.GetEntity(&e)
 	assert.EqualError(t, err, "Test URL Error")
 }
 
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	e := testEntity{}
 	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
 		return "", errors.New("Error from GetJSON")
 	})
 
-	err := c.getEntity(r, &e)
+	err := c.GetEntity(&e)
 	assert.EqualError(t, err, "Error from GetJSON")
 }
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := ClientFromCredentials(cr)
+	c := Client{Requestor: r, Credentials: cr}
 	e := testEntity{}
 	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
 		return ``, nil
 	})
 
-	err := c.getEntity(r, &e)
+	err := c.GetEntity(&e)
 	assert.EqualError(t, err, "unexpected end of JSON input")
 }
