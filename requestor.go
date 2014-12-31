@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var DefaultHTTPClient = &http.Client{}
+
 type requestor interface {
 	PostJSON(string, request) ([]byte, error)
 	GetJSON(string, request) ([]byte, error)
@@ -38,8 +40,6 @@ func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 		return nil, err
 	}
 
-	client := http.Client{}
-
 	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(j)))
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 	hr.Header.Add("Content-Type", "application/json")
 	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(hr)
+	resp, err := DefaultHTTPClient.Do(hr)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +81,6 @@ func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 }
 
 func (r clcRequestor) GetJSON(t string, req request) ([]byte, error) {
-	client := http.Client{}
-
 	hr, err := http.NewRequest("GET", req.URL, nil)
 	if err != nil {
 		return nil, err
@@ -92,7 +90,7 @@ func (r clcRequestor) GetJSON(t string, req request) ([]byte, error) {
 	hr.Header.Add("Content-Type", "application/json")
 	hr.Header.Add("Accepts", "application/json")
 
-	resp, err := client.Do(hr)
+	resp, err := DefaultHTTPClient.Do(hr)
 	if err != nil {
 		return nil, err
 	}
