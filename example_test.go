@@ -1,19 +1,18 @@
 package clcgo_test
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 
 	"github.com/CenturyLinkLabs/clcgo"
+	"github.com/CenturyLinkLabs/clcgo/fakeapi"
 )
 
 var (
 	exampleDefaultHTTPClient *http.Client
-	exampleHTTPServer        *httptest.Server
+	fakeAPIServer            *httptest.Server
 )
 
 type exampleDomainRewriter struct {
@@ -29,59 +28,17 @@ func (r exampleDomainRewriter) RoundTrip(req *http.Request) (resp *http.Response
 }
 
 func setupExample() {
-	// Set up a fake API server.
-	m := http.NewServeMux()
-	exampleHTTPServer = httptest.NewServer(m)
-
-	m.Handle("/v2/authentication/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := struct {
-			Username string
-			Password string
-		}{}
-		s, _ := ioutil.ReadAll(r.Body)
-		json.Unmarshal(s, &p)
-
-		if p.Username == "user" && p.Password == "pass" {
-			json := `{ "bearerToken": "1234ABCDEF", "accountAlias": "ACME" }`
-			fmt.Fprintf(w, json)
-		} else {
-			http.Error(w, "{}", 400)
-		}
-	}))
-
-	m.Handle("/v2/servers/ACME/server1", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer 1234ABCDEF" {
-			http.Error(w, "", 401)
-		} else {
-			json := `{
-				"id": "server1",
-				"name": "Test Server",
-				"groupId": "group1",
-				"details": {
-					"ipAddresses": [
-					{
-						"internal": "10.0.0.1"
-					},
-					{
-						"public": "8.8.8.8",
-						"internal": "10.0.0.2"
-					}
-					]
-				}
-			}`
-			fmt.Fprintf(w, json)
-		}
-	}))
+	fakeAPIServer = fakeapi.CreateFakeServer()
 
 	// Replace the clcgo.DefaultHTTPClient with one that will rewrite the
 	// requests to go to the test server instead of production.
 	exampleDefaultHTTPClient = clcgo.DefaultHTTPClient
-	u, _ := url.Parse(exampleHTTPServer.URL)
+	u, _ := url.Parse(fakeAPIServer.URL)
 	clcgo.DefaultHTTPClient = &http.Client{Transport: exampleDomainRewriter{RewriteURL: u}}
 }
 
 func teardownExample() {
-	exampleHTTPServer.Close()
+	fakeAPIServer.Close()
 	clcgo.DefaultHTTPClient = exampleDefaultHTTPClient
 }
 
@@ -124,7 +81,7 @@ func ExampleClient_GetEntity_successful() {
 
 	fmt.Printf("Server Name: %s", s.Name)
 	// Output:
-	// Server Name: Test Server
+	// Server Name: Test Name
 }
 
 func ExampleClient_GetEntity_expiredToken() {

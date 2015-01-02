@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/CenturyLinkLabs/clcgo/fakeapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -90,7 +91,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 
 func Test400WithMessagesOnPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, serverCreationInvalidResponse, 400)
+		http.Error(w, fakeapi.ServerCreationInvalidResponse, 400)
 	}))
 	defer ts.Close()
 

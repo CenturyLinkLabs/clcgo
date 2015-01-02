@@ -1,7 +1,14 @@
-package clcgo
+package fakeapi
 
+// Fixture constants for the fakeapi's hardcoded responses, including for
+// successful and unsuccessful requests.
 const (
-	serverResponse = `{
+	AuthenticationSuccessfulResponse = `{
+		"bearerToken": "1234ABCDEF",
+		"accountAlias": "ACME"
+	}`
+
+	ServerResponse = `{
 		"id": "test-id",
 		"name": "Test Name",
 		"groupId": "123il",
@@ -17,7 +24,8 @@ const (
 			]
 		}
 	}`
-	serverCreationSuccessfulResponse = `{
+
+	ServerCreationSuccessfulResponse = `{
 		"server":"web",
 		"isQueued":true,
 		"links":[
@@ -35,7 +43,7 @@ const (
 		]
 	}`
 
-	serverCreationMissingStatusResponse = `{
+	ServerCreationMissingStatusResponse = `{
 		"server":"web",
 		"isQueued":true,
 		"links":[
@@ -48,7 +56,7 @@ const (
 		]
 	}`
 
-	serverCreationInvalidResponse = `{
+	ServerCreationInvalidResponse = `{
 		"message": "The request is invalid.",
 		"modelState": {
 			"body.name": ["The name field is required."],
@@ -56,13 +64,13 @@ const (
 		}
 	}`
 
-	addPublicIPAddressSuccessfulResponse = `{
+	AddPublicIPAddressSuccessfulResponse = `{
 		"rel":"status",
 		"href":"/path/to/status",
 		"id":"id-for-status"
 	}`
 
-	dataCenterCapabilitiesResponse = `{
+	DataCenterCapabilitiesResponse = `{
 		"templates": [
 			{ "name": "Name", "description": "Description" }
 		]

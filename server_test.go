@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/CenturyLinkLabs/clcgo/fakeapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +29,7 @@ func TestImplementations(t *testing.T) {
 
 func TestServerJSONUnmarshalling(t *testing.T) {
 	s := Server{}
-	err := json.Unmarshal([]byte(serverResponse), &s)
+	err := json.Unmarshal([]byte(fakeapi.ServerResponse), &s)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "test-id", s.ID)
@@ -73,14 +74,14 @@ func TestServerRequestForSave(t *testing.T) {
 
 func TestSuccessfulStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.statusFromResponse([]byte(serverCreationSuccessfulResponse))
+	s, err := srv.statusFromResponse([]byte(fakeapi.ServerCreationSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }
 
 func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.statusFromResponse([]byte(serverCreationMissingStatusResponse))
+	s, err := srv.statusFromResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
 	assert.Nil(t, s)
 	assert.EqualError(t, err, "The creation response has no status link")
 }
@@ -107,7 +108,7 @@ func TestErroredIPAddressResponseForSave(t *testing.T) {
 
 func TestIPAddressStatusFromResponse(t *testing.T) {
 	i := PublicIPAddress{}
-	s, err := i.statusFromResponse([]byte(addPublicIPAddressSuccessfulResponse))
+	s, err := i.statusFromResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }

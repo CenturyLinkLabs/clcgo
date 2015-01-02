@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/CenturyLinkLabs/clcgo/fakeapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,7 +45,7 @@ func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 
 func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
 	d := DataCenterCapabilities{}
-	err := json.Unmarshal([]byte(dataCenterCapabilitiesResponse), &d)
+	err := json.Unmarshal([]byte(fakeapi.DataCenterCapabilitiesResponse), &d)
 
 	assert.NoError(t, err)
 	assert.Len(t, d.Templates, 1)
