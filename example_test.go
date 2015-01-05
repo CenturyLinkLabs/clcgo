@@ -103,6 +103,36 @@ func ExampleClient_GetEntity_expiredToken() {
 	// Error: Your bearer token was rejected, Status Code: 401
 }
 
+func ExampleClient_SaveEntity_successful() {
+	// Some test-related setup code which you can safely ignore.
+	setupExample()
+	defer teardownExample()
+
+	c := clcgo.NewClient()
+	c.GetCredentials("user", "pass")
+
+	// Build a Server resource. In reality there are many more required fields.
+	s := clcgo.Server{Name: "My Server"}
+
+	// Request the Server be provisioned, returning a Status. In your code you
+	// must NOT ignore the possibility of an error here.
+	st, _ := c.SaveEntity(&s)
+
+	// Refresh the Status until it has completed. In your code you should put a
+	// delay between requests, as this can take a while.
+	if !st.HasSucceeded() {
+		c.GetEntity(st)
+	}
+
+	// The Status says that the server is provisioned. You can now request its
+	// details. Again, your code should not ignore errors as this is doing.
+	c.GetEntity(&s)
+
+	fmt.Printf("Server ID: %s", s.ID)
+	// Output:
+	// Server ID: test-id
+}
+
 func ExampleCredentials_persisted() {
 	client := clcgo.NewClient()
 	creds := clcgo.Credentials{BearerToken: "TOKEN", AccountAlias: "ACME"}

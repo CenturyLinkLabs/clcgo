@@ -25,19 +25,21 @@ const (
 		}
 	}`
 
+	SuccessfulStatusResponse = `{ "status":"succeeded" }`
+
 	ServerCreationSuccessfulResponse = `{
 		"server":"web",
 		"isQueued":true,
 		"links":[
 			{
 				"rel":"status",
-				"href":"/path/to/status",
-				"id":"id-for-status"
+				"href":"/v2/operations/alias/status/test-status-id",
+				"id":"test-status-id"
 			},
 			{
 				"rel":"self",
-				"href":"/path/to/self",
-				"id":"id-for-self",
+				"href":"/v2/servers/alias/test-uuid?uuid=True",
+				"id":"test-uuid",
 				"verbs": [ "GET" ]
 			}
 		]

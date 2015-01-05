@@ -14,6 +14,7 @@ func CreateFakeServer() *httptest.Server {
 	m := http.NewServeMux()
 	s := httptest.NewServer(m)
 
+	// Authentication
 	m.Handle("/v2/authentication/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := struct {
 			Username string
@@ -29,6 +30,7 @@ func CreateFakeServer() *httptest.Server {
 		}
 	}))
 
+	// Server fetch
 	m.Handle("/v2/servers/ACME/server1", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer 1234ABCDEF" {
 			http.Error(w, "", 401)
@@ -37,5 +39,33 @@ func CreateFakeServer() *httptest.Server {
 		}
 	}))
 
+	// Server save
+	m.Handle("/v2/servers/ACME", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer 1234ABCDEF" {
+			http.Error(w, "", 401)
+		} else if r.Method != "POST" {
+			http.Error(w, "", 405)
+		} else {
+			fmt.Fprintf(w, ServerCreationSuccessfulResponse)
+		}
+	}))
+
+	// Status fetch
+	m.Handle("/v2/operations/alias/status/test-status-id", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer 1234ABCDEF" {
+			http.Error(w, "", 401)
+		} else {
+			fmt.Fprintf(w, SuccessfulStatusResponse)
+		}
+	}))
+
+	// Server fetch by UUID
+	m.Handle("/v2/servers/alias/test-uuid", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer 1234ABCDEF" {
+			http.Error(w, "", 401)
+		} else {
+			fmt.Fprintf(w, ServerResponse)
+		}
+	}))
 	return s
 }
