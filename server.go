@@ -12,12 +12,15 @@ const (
 	publicIPAddressURL = serverURL + "/publicIPAddresses"
 )
 
+// A Server can be used to either fetch an existing Server or provision and new
+// one. To fetch, you must supply an ID value. For creation, there are numerous
+// required values. The API documentation should be consulted.
 type Server struct {
 	uuidURI        string `json:"-"`
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	GroupID        string `json:"groupId"`
-	SourceServerID string `json:"sourceServerId"` // TODO: nonexistant in get, extract to creation params?
+	SourceServerID string `json:"sourceServerId"` // TODO: nonexistent in get, extract to creation params?
 	CPU            int    `json:"cpu"`
 	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
 	Type           string `json:"type"`
@@ -33,17 +36,25 @@ type serverCreationResponse struct {
 	Links []Link `json:"links"`
 }
 
+// A PublicIPAddress can be created and associated with an existing,
+// provisioned Server. You must supply the associated Server object.
+//
+// You can also supply an optional slice of Port objects that will make the
+// specified ports accessible at the address.
 type PublicIPAddress struct {
 	Server Server
 	Ports  []Port `json:"ports"`
 }
 
+// A Port object specifies a network port that should be made available on a
+// PublicIPAddress. It can only be used in conjunction with the PublicIPAddress
+// resource.
 type Port struct {
 	Protocol string `json:"protocol"`
 	Port     int    `json:"port"`
 }
 
-func (s Server) url(a string) (string, error) {
+func (s Server) URL(a string) (string, error) {
 	if s.ID == "" && s.uuidURI == "" {
 		return "", errors.New("An ID field is required to get a server")
 	} else if s.uuidURI != "" {
@@ -53,12 +64,12 @@ func (s Server) url(a string) (string, error) {
 	return fmt.Sprintf(serverURL, a, s.ID), nil
 }
 
-func (s Server) requestForSave(a string) (request, error) {
+func (s Server) RequestForSave(a string) (request, error) {
 	url := fmt.Sprintf(serverCreationURL, a)
 	return request{URL: url, Parameters: s}, nil
 }
 
-func (s *Server) statusFromResponse(r []byte) (*Status, error) {
+func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 	scr := serverCreationResponse{}
 	err := json.Unmarshal(r, &scr)
 	if err != nil {
@@ -80,7 +91,7 @@ func (s *Server) statusFromResponse(r []byte) (*Status, error) {
 	return &Status{URI: sl.HRef}, nil
 }
 
-func (i PublicIPAddress) requestForSave(a string) (request, error) {
+func (i PublicIPAddress) RequestForSave(a string) (request, error) {
 	if i.Server.ID == "" {
 		return request{}, errors.New("A Server with an ID is required to add a Public IP Address")
 	}
@@ -89,7 +100,7 @@ func (i PublicIPAddress) requestForSave(a string) (request, error) {
 	return request{URL: url, Parameters: i}, nil
 }
 
-func (i PublicIPAddress) statusFromResponse(r []byte) (*Status, error) {
+func (i PublicIPAddress) StatusFromResponse(r []byte) (*Status, error) {
 	l := Link{}
 	err := json.Unmarshal(r, &l)
 	if err != nil {

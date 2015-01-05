@@ -15,7 +15,7 @@ func TestImplementations(t *testing.T) {
 		new(Status),
 	}
 	for _, e := range es {
-		assert.Implements(t, (*entity)(nil), e)
+		assert.Implements(t, (*Entity)(nil), e)
 	}
 
 	ses := []interface{}{
@@ -23,7 +23,7 @@ func TestImplementations(t *testing.T) {
 		new(PublicIPAddress),
 	}
 	for _, se := range ses {
-		assert.Implements(t, (*savableEntity)(nil), se)
+		assert.Implements(t, (*SavableEntity)(nil), se)
 	}
 }
 
@@ -41,21 +41,21 @@ func TestServerJSONUnmarshalling(t *testing.T) {
 
 func TestWorkingServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
-	u, err := s.url("AA")
+	u, err := s.URL("AA")
 
 	assert.NoError(t, err)
 	assert.Equal(t, apiRoot+"/servers/AA/abc123", u)
 }
 
 func TestErroredServerURL(t *testing.T) {
-	u, err := Server{}.url("AA")
+	u, err := Server{}.URL("AA")
 
 	assert.EqualError(t, err, "An ID field is required to get a server")
 	assert.Empty(t, u)
 }
 
 func TestURLMissingIDHavingUUID(t *testing.T) {
-	u, err := Server{uuidURI: "/v2/alias/1234?uuid=true"}.url("AA")
+	u, err := Server{uuidURI: "/v2/alias/1234?uuid=true"}.URL("AA")
 	assert.NoError(t, err)
 	assert.Equal(t, apiDomain+"/v2/alias/1234?uuid=true", u)
 }
@@ -66,7 +66,7 @@ func TestServerRequestForSave(t *testing.T) {
 		GroupID:        "1234IL",
 		SourceServerID: "TestID",
 	}
-	req, err := s.requestForSave("AA")
+	req, err := s.RequestForSave("AA")
 	assert.NoError(t, err)
 	assert.Equal(t, apiRoot+"/servers/AA", req.URL)
 	assert.Equal(t, s, req.Parameters)
@@ -74,14 +74,14 @@ func TestServerRequestForSave(t *testing.T) {
 
 func TestSuccessfulStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.statusFromResponse([]byte(fakeapi.ServerCreationSuccessfulResponse))
+	s, err := srv.StatusFromResponse([]byte(fakeapi.ServerCreationSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }
 
 func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.statusFromResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
+	s, err := srv.StatusFromResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
 	assert.Nil(t, s)
 	assert.EqualError(t, err, "The creation response has no status link")
 }
@@ -90,7 +90,7 @@ func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
 	s := Server{ID: "1234il"}
 	ps := []Port{Port{Protocol: "TCP", Port: 31981}}
 	i := PublicIPAddress{Server: s, Ports: ps}
-	req, err := i.requestForSave("AA")
+	req, err := i.RequestForSave("AA")
 
 	assert.NoError(t, err)
 	assert.Equal(t, apiDomain+"/v2/servers/AA/1234il/publicIPAddresses", req.URL)
@@ -100,7 +100,7 @@ func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
 func TestErroredIPAddressResponseForSave(t *testing.T) {
 	s := Server{}
 	i := PublicIPAddress{Server: s}
-	req, err := i.requestForSave("AA")
+	req, err := i.RequestForSave("AA")
 
 	assert.Equal(t, request{}, req)
 	assert.EqualError(t, err, "A Server with an ID is required to add a Public IP Address")
@@ -108,7 +108,7 @@ func TestErroredIPAddressResponseForSave(t *testing.T) {
 
 func TestIPAddressStatusFromResponse(t *testing.T) {
 	i := PublicIPAddress{}
-	s, err := i.statusFromResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
+	s, err := i.StatusFromResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }

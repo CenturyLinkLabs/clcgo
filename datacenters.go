@@ -10,13 +10,21 @@ const (
 	dataCenterCapabilitiesURL = dataCentersURL + "/%s/deploymentCapabilities"
 )
 
+// The DataCenters resource can retrieve a list of available DataCenters.
 type DataCenters []DataCenter
 
+// A DataCenter resource can either be returned by the DataCenters resource, or
+// built manually. It should be used in conjunction with the
+// DataCenterCapabilities resource to request information about it.
+//
+// You must supply the ID if you are building this object manually.
 type DataCenter struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
+// DataCenterCapabilities gets more information about a specific DataCenter.
+// You must supply the associated DataCenter object.
 type DataCenterCapabilities struct {
 	DataCenter DataCenter `json:"-"`
 	Templates  []struct {
@@ -25,11 +33,11 @@ type DataCenterCapabilities struct {
 	}
 }
 
-func (d DataCenters) url(a string) (string, error) {
+func (d DataCenters) URL(a string) (string, error) {
 	return fmt.Sprintf(dataCentersURL, a), nil
 }
 
-func (d DataCenterCapabilities) url(a string) (string, error) {
+func (d DataCenterCapabilities) URL(a string) (string, error) {
 	if d.DataCenter.ID == "" {
 		return "", errors.New("Need a DataCenter with an ID")
 	}

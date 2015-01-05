@@ -102,3 +102,9 @@ func ExampleClient_GetEntity_expiredToken() {
 	// Output:
 	// Error: Your bearer token was rejected, Status Code: 401
 }
+
+func ExampleCredentials_persisted() {
+	client := clcgo.NewClient()
+	creds := clcgo.Credentials{BearerToken: "TOKEN", AccountAlias: "ACME"}
+	client.Credentials = creds // Client now ready for authenticated requests.
+}

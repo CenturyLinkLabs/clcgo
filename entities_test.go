@@ -8,7 +8,7 @@ import (
 
 func TestStatusURL(t *testing.T) {
 	s := Status{URI: "/v2/status/1234"}
-	url, err := s.url("AA")
+	url, err := s.URL("AA")
 	assert.NoError(t, err)
 	assert.Equal(t, apiDomain+"/v2/status/1234", url)
 }

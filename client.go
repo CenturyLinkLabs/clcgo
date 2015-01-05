@@ -7,26 +7,51 @@ import (
 
 const authenticationURL = apiRoot + "/authentication/login"
 
+// Credentials are used by the Client to identify you to CenturyLink Cloud in
+// any request. The BearerToken value will be good for a set period of time,
+// defined in the API documentation.
+//
+// If you anticipate making many API requests in several runs of your
+// application, it may be a good idea to save the BearerToken and AccountAlias
+// values somewhere so that they can be recalled when they are needed again,
+// rather than having to re-authenticate with the API. You can build a
+// Credentials object with those two fields, then assign it to the Client's
+// Credentials value.
+//
+// The Username and Password values will be present only if you've used
+// GetCredentials, and can otherwise be ignored.
 type Credentials struct {
 	BearerToken  string `json:"bearerToken"`
 	AccountAlias string `json:"accountAlias"`
-	Username     string `json:"username"` // TODO: nonexistant in get, extract to creation params?
-	Password     string `json:"password"` // TODO: nonexistant in get, extract to creation params?
+	Username     string `json:"username"` // TODO: nonexistent in get, extract to creation params?
+	Password     string `json:"password"` // TODO: nonexistent in get, extract to creation params?
 }
 
+// The Client stores your current credentials and uses them to set or fetch
+// data from the API. It should be instantiated with the NewClient function.
 type Client struct {
 	Credentials Credentials
 	Requestor   requestor
 }
 
-func (c Credentials) requestForSave(a string) (request, error) {
+func (c Credentials) RequestForSave(a string) (request, error) {
 	return request{URL: authenticationURL, Parameters: c}, nil
 }
 
+// NewClient returns a Client that has been configured to communicate to
+// CenturyLink Cloud. Before making any requests, the Client must be authorized
+// by either setting its Credentials field or calling the GetCredentials
+// function.
 func NewClient() *Client {
 	return &Client{Requestor: clcRequestor{}}
 }
 
+// GetCredentials accepts username and password strings to populate the Client
+// instance with valid Credentials.
+//
+// CenturyLink Cloud requires a BearerToken to authorize all requests, and this
+// method will fetch one for the user and associate it with the Client. Any
+// further requests made by the Client will include that BearerToken.
 func (c *Client) GetCredentials(u string, p string) error {
 	c.Credentials = Credentials{Username: u, Password: p}
 	_, err := c.SaveEntity(&c.Credentials)
@@ -41,8 +66,16 @@ func (c *Client) GetCredentials(u string, p string) error {
 	return nil
 }
 
-func (c *Client) GetEntity(e entity) error {
-	url, err := e.url(c.Credentials.AccountAlias)
+// GetEntity is used to fetch a summary of a resource. When you pass a pointer
+// to your resource, GetEntity will set its fields appropriately.
+//
+// Different resources have different field requirements before their summaries
+// can be fetched successfully. If you omit an ID field from a Server, for
+// instance, GetEntity will return an error informing you of the missing field.
+// An error from GetEntity likely means that your passed Entity was not
+// modified.
+func (c *Client) GetEntity(e Entity) error {
+	url, err := e.URL(c.Credentials.AccountAlias)
 	if err != nil {
 		return err
 	}
@@ -54,8 +87,27 @@ func (c *Client) GetEntity(e entity) error {
 	return json.Unmarshal(j, &e)
 }
 
-func (c *Client) SaveEntity(e savableEntity) (*Status, error) {
-	req, err := e.requestForSave(c.Credentials.AccountAlias)
+// SaveEntity is used to persist a changed resource to CenturyLink Cloud. When
+// successful, you will receive a Status and no error. Otherwise, you will
+// receive nil and an error.
+//
+// Beyond the fields absolutely required to form valid URLs, the presence or
+// format of the fields on your resources are not validated before they are
+// submitted.  You should check the CenturyLink Cloud API documentation for
+// this information. If your submission was unsuccessful, it is likely that the
+// error returned is a RequestError, which may contain helpful error messages
+// you can use to determine what went wrong.
+//
+// Calling HasSucceeded on the returned Status will tell you if the resource is
+// ready. Some resources are available immediately, but most are not. If the
+// resource implements StatusProvidingEntity it will likely take time, but
+// regardless you can check with the returned Status to be sure.
+//
+// The Status does not update itself, and you will need to call GetEntity on it
+// periodically to determine when its resource is ready if it was not
+// immediately successful.
+func (c *Client) SaveEntity(e SavableEntity) (*Status, error) {
+	req, err := e.RequestForSave(c.Credentials.AccountAlias)
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +116,8 @@ func (c *Client) SaveEntity(e savableEntity) (*Status, error) {
 		return nil, err
 	}
 
-	if spe, ok := e.(statusProvidingEntity); ok {
-		status, err := spe.statusFromResponse(resp)
+	if spe, ok := e.(StatusProvidingEntity); ok {
+		status, err := spe.StatusFromResponse(resp)
 		if err != nil {
 			return nil, err
 		}

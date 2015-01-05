@@ -14,7 +14,7 @@ type testEntity struct {
 	TestSerializedKey string `json:"testSerializedKey"`
 }
 
-func (e testEntity) url(a string) (string, error) {
+func (e testEntity) URL(a string) (string, error) {
 	if e.CallbackForURL != nil {
 		return e.CallbackForURL(a)
 	}

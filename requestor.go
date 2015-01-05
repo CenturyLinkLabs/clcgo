@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+// DefaultHTTPClient can be overridden in the same fashion as the DefaultClient
+// for http, if you would like to implement some behavioral change around the
+// requests that we could not anticipate.
 var DefaultHTTPClient = &http.Client{}
 
 type requestor interface {
@@ -19,6 +22,10 @@ type clcRequestor struct{}
 
 type modelStates map[string][]string
 
+// A RequestError can be returned from GetEntity and SaveEntity calls and
+// contain specific information about the unexpected error from your request.
+// It can be especially helpful on SaveEntity validation failures, for instance
+// if you omitted a required field.
 type RequestError struct {
 	Message    string
 	StatusCode int

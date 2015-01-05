@@ -22,7 +22,7 @@ type savableCreationParameters struct {
 	Value string
 }
 
-func (s testSavable) requestForSave(a string) (request, error) {
+func (s testSavable) RequestForSave(a string) (request, error) {
 	if s.CallbackForRequest != nil {
 		return s.CallbackForRequest(a)
 	}
@@ -33,14 +33,14 @@ func (s testSavable) requestForSave(a string) (request, error) {
 	}, nil
 }
 
-func (s testStatusProviding) requestForSave(a string) (request, error) {
+func (s testStatusProviding) RequestForSave(a string) (request, error) {
 	return request{
 		URL:        "/creation/url",
 		Parameters: savableCreationParameters{Value: "testSavable"},
 	}, nil
 }
 
-func (s testStatusProviding) statusFromResponse(r []byte) (*Status, error) {
+func (s testStatusProviding) StatusFromResponse(r []byte) (*Status, error) {
 	return s.CallbackForStatus(r)
 }
 

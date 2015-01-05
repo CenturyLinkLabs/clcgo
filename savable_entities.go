@@ -5,14 +5,20 @@ type request struct {
 	Parameters interface{}
 }
 
-// TODO Document this for this library's developers? Is a comment for an
-// unexported interface suppressed from Godoc?
-type savableEntity interface {
-	requestForSave(string) (request, error)
+// The SavableEntity interface is implemented on any resources that can be
+// saved via SaveEntity.
+type SavableEntity interface {
+	RequestForSave(string) (request, error)
 }
 
-// TODO Document this for this library's developers? Is a comment for an
-// unexported interface suppressed from Godoc?
-type statusProvidingEntity interface {
-	statusFromResponse([]byte) (*Status, error)
+// StatusProvidingEntity will be implemented by some SavableEntity resources
+// when information about the created resource is not immediately available.
+// For instance, a Server or PublicIPAddress must first be provisioned, so a
+// Status object is returned so that you can query it until the work has been
+// successfully completed.
+//
+// All StatusProvidingEntites must be SavableEntities, but not every
+// SavableEntity is a StatusProvidingEntity.
+type StatusProvidingEntity interface {
+	StatusFromResponse([]byte) (*Status, error)
 }
