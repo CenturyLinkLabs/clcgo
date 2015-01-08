@@ -12,7 +12,9 @@ const (
 		"id": "test-id",
 		"name": "Test Name",
 		"groupId": "123il",
+		"status": "active",
 		"details": {
+			"powerState": "started",
 			"ipAddresses": [
 				{
 					"internal": "10.0.0.1"

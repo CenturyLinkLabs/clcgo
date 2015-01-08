@@ -7,9 +7,11 @@ import (
 )
 
 const (
-	serverCreationURL  = apiRoot + "/servers/%s"
-	serverURL          = serverCreationURL + "/%s"
-	publicIPAddressURL = serverURL + "/publicIPAddresses"
+	serverCreationURL      = apiRoot + "/servers/%s"
+	serverURL              = serverCreationURL + "/%s"
+	publicIPAddressURL     = serverURL + "/publicIPAddresses"
+	serverActiveStatus     = "active"
+	serverPausedPowerState = "paused"
 )
 
 // A Server can be used to either fetch an existing Server or provision and new
@@ -20,11 +22,13 @@ type Server struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`
 	GroupID        string `json:"groupId"`
+	Status         string `json:"status"`
 	SourceServerID string `json:"sourceServerId"` // TODO: nonexistent in get, extract to creation params?
 	CPU            int    `json:"cpu"`
 	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
 	Type           string `json:"type"`
 	Details        struct {
+		PowerState  string `json:"powerState"`
 		IPAddresses []struct {
 			Public   string `json:"public"`
 			Internal string `json:"internal"`
@@ -52,6 +56,14 @@ type PublicIPAddress struct {
 type Port struct {
 	Protocol string `json:"protocol"`
 	Port     int    `json:"port"`
+}
+
+func (s Server) IsActive() bool {
+	return s.Status == serverActiveStatus && !s.IsPaused()
+}
+
+func (s Server) IsPaused() bool {
+	return s.Details.PowerState == serverPausedPowerState
 }
 
 func (s Server) URL(a string) (string, error) {

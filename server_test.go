@@ -34,9 +34,34 @@ func TestServerJSONUnmarshalling(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "test-id", s.ID)
 	assert.Equal(t, "Test Name", s.Name)
+	assert.Equal(t, "active", s.Status)
 	assert.Equal(t, "123il", s.GroupID)
 	assert.Len(t, s.Details.IPAddresses, 2)
 	assert.Equal(t, "8.8.8.8", s.Details.IPAddresses[1].Public)
+	assert.Equal(t, "started", s.Details.PowerState)
+}
+
+func TestIsActive(t *testing.T) {
+	s := Server{}
+	assert.False(t, s.IsActive())
+
+	s.Status = "active"
+	s.Details.PowerState = "paused"
+	assert.False(t, s.IsActive())
+
+	s.Details.PowerState = "started"
+	assert.True(t, s.IsActive())
+}
+
+func TestIsPaused(t *testing.T) {
+	s := Server{}
+	assert.False(t, s.IsPaused())
+
+	s.Details.PowerState = "started"
+	assert.False(t, s.IsPaused())
+
+	s.Details.PowerState = "paused"
+	assert.True(t, s.IsPaused())
 }
 
 func TestWorkingServerURL(t *testing.T) {
