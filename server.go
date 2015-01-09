@@ -68,10 +68,13 @@ type Port struct {
 	Port     int    `json:"port"`
 }
 
+// IsActive will, unsurprisingly, tell you if the Server is both active and not
+// paused.
 func (s Server) IsActive() bool {
 	return s.Status == serverActiveStatus && !s.IsPaused()
 }
 
+// IsPaused will tell you if the Server is paused or not.
 func (s Server) IsPaused() bool {
 	return s.Details.PowerState == serverPausedPowerState
 }
