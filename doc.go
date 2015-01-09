@@ -15,9 +15,9 @@ Usage
 
 All API interactions require authentication. You should begin by instantiating
 a Client with the NewClient function. You can then authenticate with your CLC
-username and password using the GetCredentials function. You can read more
-about the details of authentication in the documentation for the Credentials
-struct and the GetCredentials function.
+username and password using the GetAPICredentials function. You can read more
+about the details of authentication in the documentation for the APICredentials
+struct and the GetAPICredentials function.
 
 Once authenticated, the Client provides a function for fetching resources,
 GetEntity, and one for saving resource, SaveEntity. Both of those functions

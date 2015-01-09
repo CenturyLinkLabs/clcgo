@@ -24,8 +24,8 @@ func (e testEntity) URL(a string) (string, error) {
 
 func TestSuccessfulGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 
 	r.registerHandler("GET", "/entity", func(token string, req request) (string, error) {
 		assert.Equal(t, "token", token)
@@ -46,8 +46,8 @@ func TestSuccessfulGetEntity(t *testing.T) {
 
 func TestErroredURLInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{
 		CallbackForURL: func(a string) (string, error) {
 			return "", errors.New("Test URL Error")
@@ -60,8 +60,8 @@ func TestErroredURLInGetEntity(t *testing.T) {
 
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{}
 	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
 		return "", errors.New("Error from GetJSON")
@@ -73,8 +73,8 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{}
 	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
 		return ``, nil

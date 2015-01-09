@@ -46,8 +46,8 @@ func (s testStatusProviding) StatusFromResponse(r []byte) (*Status, error) {
 
 func TestSuccessfulSavableSaveEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	p := savableCreationParameters{Value: "testSavable"}
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
@@ -71,8 +71,8 @@ func TestSuccessfulSavableSaveEntity(t *testing.T) {
 
 func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	st := &Status{}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
@@ -92,8 +92,8 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 
 func TestErroredRequestSaveEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	s := testSavable{
 		CallbackForRequest: func(a string) (request, error) {
 			return request{}, errors.New("Test Request Error")
@@ -107,8 +107,8 @@ func TestErroredRequestSaveEntity(t *testing.T) {
 
 func TestErroredPostJSONSaveEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	s := testSavable{}
 
 	r.registerHandler("POST", "/creation/url", func(token string, req request) (string, error) {
@@ -122,8 +122,8 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 
 func TestErorredStatusSaveEntity(t *testing.T) {
 	r := newTestRequestor()
-	cr := Credentials{BearerToken: "token", AccountAlias: "AA"}
-	c := Client{Requestor: r, Credentials: cr}
+	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
+	c := Client{Requestor: r, APICredentials: cr}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (*Status, error) {
 			return nil, errors.New("Test Status Error")

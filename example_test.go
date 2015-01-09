@@ -42,26 +42,26 @@ func teardownExample() {
 	clcgo.DefaultHTTPClient = exampleDefaultHTTPClient
 }
 
-func ExampleClient_GetCredentials_successful() {
+func ExampleClient_GetAPICredentials_successful() {
 	// Some test-related setup code which you can safely ignore.
 	setupExample()
 	defer teardownExample()
 
 	c := clcgo.NewClient()
-	c.GetCredentials("user", "pass")
+	c.GetAPICredentials("user", "pass")
 
-	fmt.Printf("Account Alias: %s", c.Credentials.AccountAlias)
+	fmt.Printf("Account Alias: %s", c.APICredentials.AccountAlias)
 	// Output:
 	// Account Alias: ACME
 }
 
-func ExampleClient_GetCredentials_failed() {
+func ExampleClient_GetAPICredentials_failed() {
 	// Some test-related setup code which you can safely ignore.
 	setupExample()
 	defer teardownExample()
 
 	c := clcgo.NewClient()
-	err := c.GetCredentials("bad", "bad")
+	err := c.GetAPICredentials("bad", "bad")
 
 	fmt.Printf("Error: %s", err)
 	// Output:
@@ -74,7 +74,7 @@ func ExampleClient_GetEntity_successful() {
 	defer teardownExample()
 
 	c := clcgo.NewClient()
-	c.GetCredentials("user", "pass")
+	c.GetAPICredentials("user", "pass")
 
 	s := clcgo.Server{ID: "server1"}
 	c.GetEntity(&s)
@@ -92,7 +92,7 @@ func ExampleClient_GetEntity_expiredToken() {
 	c := clcgo.NewClient()
 	// You are caching this Bearer Token value and it has either expired or for
 	// some other reason become invalid.
-	c.Credentials = clcgo.Credentials{BearerToken: "expired", AccountAlias: "ACME"}
+	c.APICredentials = clcgo.APICredentials{BearerToken: "expired", AccountAlias: "ACME"}
 
 	s := clcgo.Server{ID: "server1"}
 	err := c.GetEntity(&s)
@@ -109,7 +109,7 @@ func ExampleClient_SaveEntity_successful() {
 	defer teardownExample()
 
 	c := clcgo.NewClient()
-	c.GetCredentials("user", "pass")
+	c.GetAPICredentials("user", "pass")
 
 	// Build a Server resource. In reality there are many more required fields.
 	s := clcgo.Server{Name: "My Server"}
@@ -135,6 +135,6 @@ func ExampleClient_SaveEntity_successful() {
 
 func ExampleCredentials_persisted() {
 	client := clcgo.NewClient()
-	creds := clcgo.Credentials{BearerToken: "TOKEN", AccountAlias: "ACME"}
-	client.Credentials = creds // Client now ready for authenticated requests.
+	creds := clcgo.APICredentials{BearerToken: "TOKEN", AccountAlias: "ACME"}
+	client.APICredentials = creds // Client now ready for authenticated requests.
 }

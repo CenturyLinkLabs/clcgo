@@ -7,20 +7,20 @@ import (
 
 const authenticationURL = apiRoot + "/authentication/login"
 
-// Credentials are used by the Client to identify you to CenturyLink Cloud in
-// any request. The BearerToken value will be good for a set period of time,
+// APICredentials are used by the Client to identify you to CenturyLink Cloud
+// in any request. The BearerToken value will be good for a set period of time,
 // defined in the API documentation.
 //
 // If you anticipate making many API requests in several runs of your
 // application, it may be a good idea to save the BearerToken and AccountAlias
 // values somewhere so that they can be recalled when they are needed again,
 // rather than having to re-authenticate with the API. You can build a
-// Credentials object with those two fields, then assign it to the Client's
-// Credentials value.
+// APICredentials object with those two fields, then assign it to the Client's
+// APICredentials value.
 //
 // The Username and Password values will be present only if you've used
-// GetCredentials, and can otherwise be ignored.
-type Credentials struct {
+// GetAPICredentials, and can otherwise be ignored.
+type APICredentials struct {
 	BearerToken  string `json:"bearerToken"`
 	AccountAlias string `json:"accountAlias"`
 	Username     string `json:"username"` // TODO: nonexistent in get, extract to creation params?
@@ -30,31 +30,31 @@ type Credentials struct {
 // The Client stores your current credentials and uses them to set or fetch
 // data from the API. It should be instantiated with the NewClient function.
 type Client struct {
-	Credentials Credentials
-	Requestor   requestor
+	APICredentials APICredentials
+	Requestor      requestor
 }
 
-func (c Credentials) RequestForSave(a string) (request, error) {
+func (c APICredentials) RequestForSave(a string) (request, error) {
 	return request{URL: authenticationURL, Parameters: c}, nil
 }
 
 // NewClient returns a Client that has been configured to communicate to
 // CenturyLink Cloud. Before making any requests, the Client must be authorized
-// by either setting its Credentials field or calling the GetCredentials
+// by either setting its APICredentials field or calling the GetAPICredentials
 // function.
 func NewClient() *Client {
 	return &Client{Requestor: clcRequestor{}}
 }
 
-// GetCredentials accepts username and password strings to populate the Client
-// instance with valid Credentials.
+// GetAPICredentials accepts username and password strings to populate the
+// Client instance with valid APICredentials.
 //
 // CenturyLink Cloud requires a BearerToken to authorize all requests, and this
 // method will fetch one for the user and associate it with the Client. Any
 // further requests made by the Client will include that BearerToken.
-func (c *Client) GetCredentials(u string, p string) error {
-	c.Credentials = Credentials{Username: u, Password: p}
-	_, err := c.SaveEntity(&c.Credentials)
+func (c *Client) GetAPICredentials(u string, p string) error {
+	c.APICredentials = APICredentials{Username: u, Password: p}
+	_, err := c.SaveEntity(&c.APICredentials)
 	if err != nil {
 		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
 			err = errors.New("There was a problem with your credentials")
@@ -75,11 +75,11 @@ func (c *Client) GetCredentials(u string, p string) error {
 // An error from GetEntity likely means that your passed Entity was not
 // modified.
 func (c *Client) GetEntity(e Entity) error {
-	url, err := e.URL(c.Credentials.AccountAlias)
+	url, err := e.URL(c.APICredentials.AccountAlias)
 	if err != nil {
 		return err
 	}
-	j, err := c.Requestor.GetJSON(c.Credentials.BearerToken, request{URL: url})
+	j, err := c.Requestor.GetJSON(c.APICredentials.BearerToken, request{URL: url})
 	if err != nil {
 		return err
 	}
@@ -107,11 +107,11 @@ func (c *Client) GetEntity(e Entity) error {
 // periodically to determine when its resource is ready if it was not
 // immediately successful.
 func (c *Client) SaveEntity(e SavableEntity) (*Status, error) {
-	req, err := e.RequestForSave(c.Credentials.AccountAlias)
+	req, err := e.RequestForSave(c.APICredentials.AccountAlias)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.Requestor.PostJSON(c.Credentials.BearerToken, req)
+	resp, err := c.Requestor.PostJSON(c.APICredentials.BearerToken, req)
 	if err != nil {
 		return nil, err
 	}
