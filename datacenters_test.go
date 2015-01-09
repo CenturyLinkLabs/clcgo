@@ -48,7 +48,13 @@ func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
 	err := json.Unmarshal([]byte(fakeapi.DataCenterCapabilitiesResponse), &d)
 
 	assert.NoError(t, err)
-	assert.Len(t, d.Templates, 1)
-	assert.Equal(t, "Name", d.Templates[0].Name)
-	assert.Equal(t, "Description", d.Templates[0].Description)
+	if assert.Len(t, d.Templates, 1) {
+		assert.Equal(t, "Name", d.Templates[0].Name)
+		assert.Equal(t, "Description", d.Templates[0].Description)
+	}
+
+	if assert.Len(t, d.DeployableNetworks, 1) {
+		assert.Equal(t, "Test Network", d.DeployableNetworks[0].Name)
+		assert.Equal(t, "id-for-network", d.DeployableNetworks[0].NetworkID)
+	}
 }

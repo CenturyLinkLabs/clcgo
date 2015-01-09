@@ -26,6 +26,7 @@ type Server struct {
 	SourceServerID string `json:"sourceServerId"` // TODO: nonexistent in get, extract to creation params?
 	CPU            int    `json:"cpu"`
 	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
+	Password       string `json:"password"`
 	Type           string `json:"type"`
 	Details        struct {
 		PowerState  string `json:"powerState"`

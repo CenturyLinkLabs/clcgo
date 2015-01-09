@@ -26,11 +26,17 @@ type DataCenter struct {
 // DataCenterCapabilities gets more information about a specific DataCenter.
 // You must supply the associated DataCenter object.
 type DataCenterCapabilities struct {
-	DataCenter DataCenter `json:"-"`
-	Templates  []struct {
+	DataCenter         DataCenter `json:"-"`
+	DeployableNetworks []struct {
+		Name      string `json:"name"`
+		NetworkID string `json:"networkId"`
+		Type      string `json:"type"`
+		AccountID string `json:"accountID"`
+	} `json:"deployableNetworks"`
+	Templates []struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
-	}
+	} `json:"templates"`
 }
 
 func (d DataCenters) URL(a string) (string, error) {

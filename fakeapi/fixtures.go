@@ -75,6 +75,14 @@ const (
 	}`
 
 	DataCenterCapabilitiesResponse = `{
+	"deployableNetworks":[
+		{
+			"name":"Test Network",
+			"networkId":"id-for-network",
+			"type":"private",
+			"accountID":"ACME"
+		}
+	],
 		"templates": [
 			{ "name": "Name", "description": "Description" }
 		]
