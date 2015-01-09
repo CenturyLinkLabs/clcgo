@@ -36,6 +36,16 @@ type Server struct {
 	} `json:"details"`
 }
 
+// Credentials can be used to fetch the username and password for a Server. You
+// must supply the associated Server.
+//
+// This uses an undocumented API endpoint and could be changed or removed.
+type Credentials struct {
+	Server   Server `json:"-"`
+	Username string `json:"userName"`
+	Password string `json:"password"`
+}
+
 type serverCreationResponse struct {
 	Links []Link `json:"links"`
 }
@@ -101,6 +111,15 @@ func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
 	s.uuidURI = il.HRef
 
 	return &Status{URI: sl.HRef}, nil
+}
+
+func (c Credentials) URL(a string) (string, error) {
+	if c.Server.ID == "" {
+		return "", errors.New("A Server with an ID is required to fetch credentials")
+	}
+
+	url := fmt.Sprintf("%s/servers/%s/%s/credentials", apiRoot, a, c.Server.ID)
+	return url, nil
 }
 
 func (i PublicIPAddress) RequestForSave(a string) (request, error) {

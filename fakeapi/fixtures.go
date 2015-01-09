@@ -27,6 +27,8 @@ const (
 		}
 	}`
 
+	ServerCredentialsResponse = `{"userName":"root","password":"p4ssw0rd"}`
+
 	SuccessfulStatusResponse = `{ "status":"succeeded" }`
 
 	ServerCreationSuccessfulResponse = `{

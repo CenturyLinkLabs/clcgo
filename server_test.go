@@ -12,6 +12,7 @@ func TestImplementations(t *testing.T) {
 	es := []interface{}{
 		new(DataCenterCapabilities),
 		new(Server),
+		new(Credentials),
 		new(Status),
 	}
 	for _, e := range es {
@@ -64,7 +65,7 @@ func TestIsPaused(t *testing.T) {
 	assert.True(t, s.IsPaused())
 }
 
-func TestWorkingServerURL(t *testing.T) {
+func TestSuccessfulServerURL(t *testing.T) {
 	s := Server{ID: "abc123"}
 	u, err := s.URL("AA")
 
@@ -136,4 +137,31 @@ func TestIPAddressStatusFromResponse(t *testing.T) {
 	s, err := i.StatusFromResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
+}
+
+func TestCredentialsJSONUnmarshalling(t *testing.T) {
+	c := Credentials{}
+	err := json.Unmarshal([]byte(fakeapi.ServerCredentialsResponse), &c)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "root", c.Username)
+	assert.Equal(t, "p4ssw0rd", c.Password)
+}
+
+func TestSuccessfulCredentialsURL(t *testing.T) {
+	s := Server{ID: "abc123"}
+	c := Credentials{Server: s}
+	u, err := c.URL("AA")
+
+	assert.NoError(t, err)
+	assert.Equal(t, apiRoot+"/servers/AA/abc123/credentials", u)
+}
+
+func TestErroredCredentialsURL(t *testing.T) {
+	c := Credentials{}
+	c.Server = Server{ID: ""}
+
+	u, err := c.URL("AA")
+	assert.EqualError(t, err, "A Server with an ID is required to fetch credentials")
+	assert.Empty(t, u)
 }
