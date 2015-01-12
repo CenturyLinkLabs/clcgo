@@ -18,6 +18,10 @@ const (
 // one. To fetch, you must supply an ID value. For creation, there are numerous
 // required values. The API documentation should be consulted.
 //
+// The SourceServerID is a required field that allows multiple values which are
+// documented in the API. One of the allowed values is a Template ID, which can
+// be retrieved with the DataCenterCapabilities resource.
+//
 // To make your server a member of a specific network, you can set the
 // DeployableNetwork field. This is optional. The Server will otherwise be a
 // member of the default network. DeployableNetworks exist per account and
