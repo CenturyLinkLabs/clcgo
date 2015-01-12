@@ -96,6 +96,14 @@ func TestServerRequestForSave(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, apiRoot+"/servers/AA", req.URL)
 	assert.Equal(t, s, req.Parameters)
+	assert.Empty(t, s.NetworkID)
+
+	d := DeployableNetwork{NetworkID: "test-network-id"}
+	s.DeployableNetwork = d
+	req, err = s.RequestForSave("AA")
+	assert.Equal(t, s, req.Parameters)
+	assert.NoError(t, err)
+	assert.Equal(t, "test-network-id", s.NetworkID)
 }
 
 func TestSuccessfulStatusFromResponse(t *testing.T) {

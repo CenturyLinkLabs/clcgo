@@ -26,11 +26,22 @@ type DataCenter struct {
 // DataCenterCapabilities gets more information about a specific DataCenter.
 // You must supply the associated DataCenter object.
 type DataCenterCapabilities struct {
-	DataCenter DataCenter `json:"-"`
-	Templates  []struct {
+	DataCenter         DataCenter          `json:"-"`
+	DeployableNetworks []DeployableNetwork `json:"deployableNetworks"`
+	Templates          []struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
-	}
+	} `json:"templates"`
+}
+
+// A DeployableNetwork describes a private network that is scoped to an Account
+// and DataCenter. It can be fetched via the DataCenterCapabilities and can
+// optionally be used to put a Server in a specific network.
+type DeployableNetwork struct {
+	Name      string `json:"name"`
+	NetworkID string `json:"networkId"`
+	Type      string `json:"type"`
+	AccountID string `json:"accountID"`
 }
 
 func (d DataCenters) URL(a string) (string, error) {

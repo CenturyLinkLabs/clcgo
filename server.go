@@ -17,17 +17,25 @@ const (
 // A Server can be used to either fetch an existing Server or provision and new
 // one. To fetch, you must supply an ID value. For creation, there are numerous
 // required values. The API documentation should be consulted.
+//
+// To make your server a member of a specific network, you can set the
+// DeployableNetwork field. This is optional. The Server will otherwise be a
+// member of the default network. DeployableNetworks exist per account and
+// DataCenter and can be retrieved via the DataCenterCapabilities resource. If
+// you know the NetworkID, you can supply it instead.
 type Server struct {
-	uuidURI        string `json:"-"`
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	GroupID        string `json:"groupId"`
-	Status         string `json:"status"`
-	SourceServerID string `json:"sourceServerId"` // TODO: nonexistent in get, extract to creation params?
-	CPU            int    `json:"cpu"`
-	MemoryGB       int    `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
-	Type           string `json:"type"`
-	Details        struct {
+	uuidURI           string            `json:"-"`
+	ID                string            `json:"id"`
+	Name              string            `json:"name"`
+	GroupID           string            `json:"groupId"`
+	Status            string            `json:"status"`
+	SourceServerID    string            `json:"sourceServerId"` // TODO: nonexistent in get, extract to creation params?
+	CPU               int               `json:"cpu"`
+	MemoryGB          int               `json:"memoryGB"` // TODO: memoryMB in get, extract to creation params?
+	Type              string            `json:"type"`
+	DeployableNetwork DeployableNetwork `json:"-"`
+	NetworkID         string            `json:"networkId"`
+	Details           struct {
 		PowerState  string `json:"powerState"`
 		IPAddresses []struct {
 			Public   string `json:"public"`
@@ -53,8 +61,8 @@ type serverCreationResponse struct {
 // A PublicIPAddress can be created and associated with an existing,
 // provisioned Server. You must supply the associated Server object.
 //
-// You can also supply an optional slice of Port objects that will make the
-// specified ports accessible at the address.
+// You must supply a slice of Port objects that will make the specified ports
+// accessible at the address.
 type PublicIPAddress struct {
 	Server Server
 	Ports  []Port `json:"ports"`
@@ -89,9 +97,10 @@ func (s Server) URL(a string) (string, error) {
 	return fmt.Sprintf(serverURL, a, s.ID), nil
 }
 
-func (s Server) RequestForSave(a string) (request, error) {
+func (s *Server) RequestForSave(a string) (request, error) {
 	url := fmt.Sprintf(serverCreationURL, a)
-	return request{URL: url, Parameters: s}, nil
+	s.NetworkID = s.DeployableNetwork.NetworkID
+	return request{URL: url, Parameters: *s}, nil
 }
 
 func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
