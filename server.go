@@ -27,6 +27,10 @@ const (
 // member of the default network. DeployableNetworks exist per account and
 // DataCenter and can be retrieved via the DataCenterCapabilities resource. If
 // you know the NetworkID, you can supply it instead.
+//
+// A Password field can be set for a Server you are saving, but fetching the
+// username and password for an existing Server can only be done via the
+// Credentials resource.
 type Server struct {
 	uuidURI           string            `json:"-"`
 	ID                string            `json:"id"`
@@ -39,6 +43,7 @@ type Server struct {
 	Type              string            `json:"type"`
 	DeployableNetwork DeployableNetwork `json:"-"`
 	NetworkID         string            `json:"networkId"`
+	Password          string            `json:"password"`
 	Details           struct {
 		PowerState  string `json:"powerState"`
 		IPAddresses []struct {
