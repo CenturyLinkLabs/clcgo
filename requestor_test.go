@@ -55,6 +55,22 @@ func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestSuccessfulPassingArrayToPostJSON(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s, err := ioutil.ReadAll(r.Body)
+		assert.NoError(t, err)
+		assert.Equal(t, `["first","second"]`, s)
+
+		fmt.Fprintf(w, "Response Text")
+	}))
+	defer ts.Close()
+
+	r := &clcRequestor{}
+	req := request{URL: ts.URL, Parameters: []string{"first", "second"}}
+	_, err := r.PostJSON("token", req)
+	assert.NoError(t, err)
+}
+
 func TestUnauthorizedPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", 401)

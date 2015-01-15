@@ -70,6 +70,20 @@ const (
 		}
 	}`
 
+	PauseServersSuccessfulResponse = `[
+		{
+			"server": "test-id",
+			"isQueued": true,
+			"links": [
+				{
+					"rel": "status",
+					"href": "/path/to/status",
+					"id": "id-for-status"
+				}
+			]
+		}
+	]`
+
 	AddPublicIPAddressSuccessfulResponse = `{
 		"rel":"status",
 		"href":"/path/to/status",

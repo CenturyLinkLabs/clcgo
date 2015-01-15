@@ -120,7 +120,7 @@ func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	assert.EqualError(t, err, "The creation response has no status link")
 }
 
-func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
+func TestSuccessfulIPAddressRequestForSave(t *testing.T) {
 	s := Server{ID: "1234il"}
 	ps := []Port{Port{Protocol: "TCP", Port: 31981}}
 	i := PublicIPAddress{Server: s, Ports: ps}
@@ -131,7 +131,7 @@ func TestSuccessfulIPAddressResponseForSave(t *testing.T) {
 	assert.Equal(t, i, req.Parameters)
 }
 
-func TestErroredIPAddressResponseForSave(t *testing.T) {
+func TestErroredIPAddressRequestForSave(t *testing.T) {
 	s := Server{}
 	i := PublicIPAddress{Server: s}
 	req, err := i.RequestForSave("AA")
