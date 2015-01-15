@@ -50,6 +50,9 @@ func TestIsActive(t *testing.T) {
 	s.Details.PowerState = "paused"
 	assert.False(t, s.IsActive())
 
+	s.Details.PowerState = "stopped"
+	assert.False(t, s.IsActive())
+
 	s.Details.PowerState = "started"
 	assert.True(t, s.IsActive())
 }

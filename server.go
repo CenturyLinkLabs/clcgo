@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	serverCreationURL      = apiRoot + "/servers/%s"
-	serverURL              = serverCreationURL + "/%s"
-	publicIPAddressURL     = serverURL + "/publicIPAddresses"
-	serverActiveStatus     = "active"
-	serverPausedPowerState = "paused"
+	serverCreationURL       = apiRoot + "/servers/%s"
+	serverURL               = serverCreationURL + "/%s"
+	publicIPAddressURL      = serverURL + "/publicIPAddresses"
+	serverActiveStatus      = "active"
+	serverStartedPowerState = "started"
+	serverPausedPowerState  = "paused"
 )
 
 // A Server can be used to either fetch an existing Server or provision and new
@@ -88,7 +89,7 @@ type Port struct {
 // IsActive will, unsurprisingly, tell you if the Server is both active and not
 // paused.
 func (s Server) IsActive() bool {
-	return s.Status == serverActiveStatus && !s.IsPaused()
+	return s.Status == serverActiveStatus && s.Details.PowerState == serverStartedPowerState
 }
 
 // IsPaused will tell you if the Server is paused or not.
