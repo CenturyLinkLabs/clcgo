@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSuccessfulPauseServersRequestForSave(t *testing.T) {
+func TestSuccessfulServerOperationRequestForSave(t *testing.T) {
 	s := Server{ID: "test-id"}
-	p := PauseServer{Server: s}
+	p := ServerOperation{Server: s, OperationType: PauseServer}
 	req, err := p.RequestForSave("AA")
 
 	assert.NoError(t, err)
@@ -22,17 +22,24 @@ func TestSuccessfulPauseServersRequestForSave(t *testing.T) {
 	}
 }
 
-func TestErroredPauseServersRequestForSave(t *testing.T) {
-	p := PauseServer{}
+func TestErroredServerOperationRequestForSave(t *testing.T) {
+	p := ServerOperation{OperationType: PauseServer}
 	req, err := p.RequestForSave("AA")
 
 	assert.Equal(t, request{}, req)
-	assert.EqualError(t, err, "PauseServer requires a Server with an ID to pause!")
+	assert.EqualError(t, err, "ServerOperation requires a Server and OperationType")
+
+	s := Server{ID: "test-id"}
+	p = ServerOperation{Server: s}
+	req, err = p.RequestForSave("AA")
+
+	assert.Equal(t, request{}, req)
+	assert.EqualError(t, err, "ServerOperation requires a Server and OperationType")
 }
 
-func TestPauseServersStatusFromResponse(t *testing.T) {
+func TestServerOperationStatusFromResponse(t *testing.T) {
 	s := Server{ID: "test-id"}
-	p := PauseServer{Server: s}
+	p := ServerOperation{Server: s, OperationType: PauseServer}
 	st, err := p.StatusFromResponse([]byte(fakeapi.PauseServersSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", st.URI)

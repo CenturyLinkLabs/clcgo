@@ -6,8 +6,20 @@ import (
 	"fmt"
 )
 
-type PauseServer struct {
-	Server Server
+type OperationType string
+
+const (
+	PauseServer    OperationType = "pause"
+	ShutDownServer OperationType = "shutDown"
+	RebootServer   OperationType = "reboot"
+	ResetServer    OperationType = "reset"
+	PowerOnServer  OperationType = "powerOn"
+	PowerOffServer OperationType = "powerOff"
+)
+
+type ServerOperation struct {
+	OperationType OperationType
+	Server        Server
 }
 
 type operationResponse struct {
@@ -16,23 +28,23 @@ type operationResponse struct {
 
 const (
 	operationsRoot = apiRoot + "/operations"
-	pauseURL       = operationsRoot + "/%s/servers/pause"
+	operationURL   = operationsRoot + "/%s/servers/%s"
 )
 
-func (p PauseServer) RequestForSave(a string) (request, error) {
-	if p.Server.ID == "" {
-		return request{}, errors.New("PauseServer requires a Server with an ID to pause!")
+func (p ServerOperation) RequestForSave(a string) (request, error) {
+	if p.Server.ID == "" || p.OperationType == "" {
+		return request{}, errors.New("ServerOperation requires a Server and OperationType")
 	}
 
 	r := request{
-		URL:        fmt.Sprintf(pauseURL, a),
+		URL:        fmt.Sprintf(operationURL, a, p.OperationType),
 		Parameters: []string{p.Server.ID},
 	}
 
 	return r, nil
 }
 
-func (p PauseServer) StatusFromResponse(r []byte) (*Status, error) {
+func (p ServerOperation) StatusFromResponse(r []byte) (*Status, error) {
 	ors := []operationResponse{}
 	err := json.Unmarshal(r, &ors)
 	if err != nil {
