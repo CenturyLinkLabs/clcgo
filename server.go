@@ -113,7 +113,7 @@ func (s *Server) RequestForSave(a string) (request, error) {
 	return request{URL: url, Parameters: *s}, nil
 }
 
-func (s *Server) StatusFromResponse(r []byte) (Status, error) {
+func (s *Server) StatusFromCreateResponse(r []byte) (Status, error) {
 	scr := serverCreationResponse{}
 	err := json.Unmarshal(r, &scr)
 	if err != nil {
@@ -153,7 +153,7 @@ func (i PublicIPAddress) RequestForSave(a string) (request, error) {
 	return request{URL: url, Parameters: i}, nil
 }
 
-func (i PublicIPAddress) StatusFromResponse(r []byte) (Status, error) {
+func (i PublicIPAddress) StatusFromCreateResponse(r []byte) (Status, error) {
 	l := Link{}
 	err := json.Unmarshal(r, &l)
 	if err != nil {

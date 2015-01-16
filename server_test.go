@@ -109,16 +109,16 @@ func TestServerRequestForSave(t *testing.T) {
 	assert.Equal(t, "test-network-id", s.NetworkID)
 }
 
-func TestSuccessfulStatusFromResponse(t *testing.T) {
+func TestSuccessfulStatusFromCreateResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.StatusFromResponse([]byte(fakeapi.ServerCreationSuccessfulResponse))
+	s, err := srv.StatusFromCreateResponse([]byte(fakeapi.ServerCreationSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/v2/operations/alias/status/test-status-id", s.URI)
 }
 
-func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
+func TestErroredMissingStatusLinkStatusFromCreateResponse(t *testing.T) {
 	srv := Server{}
-	s, err := srv.StatusFromResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
+	s, err := srv.StatusFromCreateResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
 	assert.Equal(t, Status{}, s)
 	assert.EqualError(t, err, "The creation response has no status link")
 }
@@ -143,9 +143,9 @@ func TestErroredIPAddressRequestForSave(t *testing.T) {
 	assert.EqualError(t, err, "A Server with an ID is required to add a Public IP Address")
 }
 
-func TestIPAddressStatusFromResponse(t *testing.T) {
+func TestIPAddressStatusFromCreateResponse(t *testing.T) {
 	i := PublicIPAddress{}
-	s, err := i.StatusFromResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
+	s, err := i.StatusFromCreateResponse([]byte(fakeapi.AddPublicIPAddressSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", s.URI)
 }

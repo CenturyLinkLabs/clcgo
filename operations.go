@@ -44,7 +44,7 @@ func (p ServerOperation) RequestForSave(a string) (request, error) {
 	return r, nil
 }
 
-func (p ServerOperation) StatusFromResponse(r []byte) (Status, error) {
+func (p ServerOperation) StatusFromCreateResponse(r []byte) (Status, error) {
 	ors := []operationResponse{}
 	err := json.Unmarshal(r, &ors)
 	if err != nil {

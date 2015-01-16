@@ -98,8 +98,8 @@ func (c *Client) GetEntity(e Entity) error {
 //
 // Calling HasSucceeded on the returned Status will tell you if the resource is
 // ready. Some resources are available immediately, but most are not. If the
-// resource implements StatusProvidingEntity it will likely take time, but
-// regardless you can check with the returned Status to be sure.
+// resource implements CreationStatusProvidingEntity it will likely take time,
+// but regardless you can check with the returned Status to be sure.
 //
 // The Status does not update itself, and you will need to call GetEntity on it
 // periodically to determine when its resource is ready if it was not
@@ -118,8 +118,8 @@ func (c *Client) SaveEntity(e SavableEntity) (Status, error) {
 		return Status{}, err
 	}
 
-	if spe, ok := e.(StatusProvidingEntity); ok {
-		status, err := spe.StatusFromResponse(resp)
+	if spe, ok := e.(CreationStatusProvidingEntity); ok {
+		status, err := spe.StatusFromCreateResponse(resp)
 		if err != nil {
 			return Status{}, err
 		}

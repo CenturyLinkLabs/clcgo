@@ -40,7 +40,7 @@ func (s testStatusProviding) RequestForSave(a string) (request, error) {
 	}, nil
 }
 
-func (s testStatusProviding) StatusFromResponse(r []byte) (Status, error) {
+func (s testStatusProviding) StatusFromCreateResponse(r []byte) (Status, error) {
 	return s.CallbackForStatus(r)
 }
 

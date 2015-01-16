@@ -37,10 +37,10 @@ func TestErroredServerOperationRequestForSave(t *testing.T) {
 	assert.EqualError(t, err, "ServerOperation requires a Server and OperationType")
 }
 
-func TestServerOperationStatusFromResponse(t *testing.T) {
+func TestServerOperationStatusFromCreateResponse(t *testing.T) {
 	s := Server{ID: "test-id"}
 	p := ServerOperation{Server: s, OperationType: PauseServer}
-	st, err := p.StatusFromResponse([]byte(fakeapi.PauseServersSuccessfulResponse))
+	st, err := p.StatusFromCreateResponse([]byte(fakeapi.PauseServersSuccessfulResponse))
 	assert.NoError(t, err)
 	assert.Equal(t, "/path/to/status", st.URI)
 }
