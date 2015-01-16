@@ -130,3 +130,25 @@ func (c *Client) SaveEntity(e SavableEntity) (Status, error) {
 	json.Unmarshal(resp, &e)
 	return Status{Status: successfulStatus}, nil
 }
+
+func (c *Client) DeleteEntity(e Entity) (Status, error) {
+	url, err := e.URL(c.APICredentials.AccountAlias)
+	if err != nil {
+		return Status{}, err
+	}
+	resp, err := c.Requestor.DeleteJSON(c.APICredentials.BearerToken, request{URL: url})
+	if err != nil {
+		return Status{}, err
+	}
+
+	if spe, ok := e.(DeletionStatusProvidingEntity); ok {
+		status, err := spe.StatusFromDeleteResponse(resp)
+		if err != nil {
+			return Status{}, err
+		}
+
+		return status, nil
+	}
+
+	return Status{Status: successfulStatus}, nil
+}

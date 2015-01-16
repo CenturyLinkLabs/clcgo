@@ -73,7 +73,7 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
 	c := Client{Requestor: r, APICredentials: cr}
-	st := Status{}
+	st := Status{Status: "Custom"}
 	s := testStatusProviding{
 		CallbackForStatus: func(r []byte) (Status, error) {
 			assert.Equal(t, []byte(creationResponse), r)

@@ -14,6 +14,10 @@ type Entity interface {
 	URL(string) (string, error)
 }
 
+type DeletionStatusProvidingEntity interface {
+	StatusFromDeleteResponse([]byte) (Status, error)
+}
+
 // A Status is returned by all SaveEntity calls and can be used to determine
 // when long-running provisioning jobs have completed. Things like Server
 // creation take time, and you can periodically call GetEntity on the returned

@@ -1,9 +1,6 @@
 package clcgo
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
 type handlerCallback func(string, request) (string, error)
 
@@ -36,7 +33,7 @@ func (r testRequestor) PostJSON(t string, req request) ([]byte, error) {
 }
 
 func (r testRequestor) DeleteJSON(t string, req request) ([]byte, error) {
-	return []byte{}, errors.New("NOT IMPLEMENTED!")
+	return r.responseForMethod("DELETE", t, req)
 }
 
 func (r testRequestor) responseForMethod(m string, t string, req request) ([]byte, error) {
