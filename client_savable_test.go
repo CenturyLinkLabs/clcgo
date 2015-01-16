@@ -120,7 +120,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	assert.EqualError(t, err, "Error from PostJSON")
 }
 
-func TestErorredStatusSaveEntity(t *testing.T) {
+func TestErroredStatusSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
 	c := Client{Requestor: r, APICredentials: cr}

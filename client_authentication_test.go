@@ -25,7 +25,7 @@ func TestSuccessfulGetAPICredentials(t *testing.T) {
 	assert.Equal(t, "expected token", c.APICredentials.BearerToken)
 }
 
-func TestErorredGetAPICredentials(t *testing.T) {
+func TestErroredGetAPICredentials(t *testing.T) {
 	r := newTestRequestor()
 	c := Client{Requestor: r}
 
