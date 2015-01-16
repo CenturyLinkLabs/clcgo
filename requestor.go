@@ -1,11 +1,12 @@
 package clcgo
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 // DefaultHTTPClient can be overridden in the same fashion as the DefaultClient
@@ -16,6 +17,7 @@ var DefaultHTTPClient = &http.Client{}
 type requestor interface {
 	PostJSON(string, request) ([]byte, error)
 	GetJSON(string, request) ([]byte, error)
+	DeleteJSON(string, request) ([]byte, error)
 }
 
 type clcRequestor struct{}
@@ -42,34 +44,12 @@ func (r RequestError) Error() string {
 }
 
 func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
-	j, err := json.Marshal(req.Parameters)
+	body, code, err := requestFor("POST", t, req)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	hr, err := http.NewRequest("POST", req.URL, strings.NewReader(string(j)))
-	if err != nil {
-		return nil, err
-	}
-
-	if t != "" {
-		hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	}
-	hr.Header.Add("Content-Type", "application/json")
-	hr.Header.Add("Accepts", "application/json")
-
-	resp, err := DefaultHTTPClient.Do(hr)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	switch resp.StatusCode {
+	switch code {
 	case 200, 201, 202:
 		return body, nil
 	case 400:
@@ -83,39 +63,76 @@ func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 	case 401:
 		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
 	}
 }
 
 func (r clcRequestor) GetJSON(t string, req request) ([]byte, error) {
-	hr, err := http.NewRequest("GET", req.URL, nil)
+	body, code, err := requestFor("GET", t, req)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 
-	hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	hr.Header.Add("Content-Type", "application/json")
-	hr.Header.Add("Accepts", "application/json")
-
-	resp, err := DefaultHTTPClient.Do(hr)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	switch resp.StatusCode {
+	switch code {
 	case 200:
 		return body, nil
 	case 401:
 		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{Message: "Got an unexpected status code", StatusCode: resp.StatusCode}
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
 	}
+}
+
+func (r clcRequestor) DeleteJSON(t string, req request) ([]byte, error) {
+	body, code, err := requestFor("DELETE", t, req)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	switch code {
+	case 202:
+		return body, nil
+	case 401:
+		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
+	default:
+		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
+	}
+}
+
+func requestFor(m string, t string, req request) ([]byte, int, error) {
+	var params io.Reader
+	if req.Parameters != nil {
+		j, err := json.Marshal(req.Parameters)
+		if err != nil {
+			return []byte{}, 0, err
+		}
+
+		params = bytes.NewReader(j)
+	}
+
+	hr, err := http.NewRequest(m, req.URL, params)
+	if err != nil {
+		return []byte{}, 0, err
+	}
+
+	if t != "" {
+		hr.Header.Add("Authorization", fmt.Sprintf("Bearer %s", t))
+	}
+	hr.Header.Add("Content-Type", "application/json")
+	hr.Header.Add("Accepts", "application/json")
+
+	resp, err := DefaultHTTPClient.Do(hr)
+	if err != nil {
+		return []byte{}, 0, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, 0, err
+	}
+
+	return body, resp.StatusCode, nil
 }
 
 func typeFromLinks(t string, ls []Link) (Link, error) {
