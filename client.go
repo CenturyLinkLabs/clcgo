@@ -87,9 +87,7 @@ func (c *Client) GetEntity(e Entity) error {
 	return json.Unmarshal(j, &e)
 }
 
-// SaveEntity is used to persist a changed resource to CenturyLink Cloud. When
-// successful, you will receive a Status and no error. Otherwise, you will
-// receive nil and an error.
+// SaveEntity is used to persist a changed resource to CenturyLink Cloud.
 //
 // Beyond the fields absolutely required to form valid URLs, the presence or
 // format of the fields on your resources are not validated before they are
@@ -106,25 +104,29 @@ func (c *Client) GetEntity(e Entity) error {
 // The Status does not update itself, and you will need to call GetEntity on it
 // periodically to determine when its resource is ready if it was not
 // immediately successful.
-func (c *Client) SaveEntity(e SavableEntity) (*Status, error) {
+//
+// Never ignore the error result from this call! Even if your code is perfect
+// (congratulations, by the way), errors can still occur due to unexpected
+// server states or networking issues.
+func (c *Client) SaveEntity(e SavableEntity) (Status, error) {
 	req, err := e.RequestForSave(c.APICredentials.AccountAlias)
 	if err != nil {
-		return nil, err
+		return Status{}, err
 	}
 	resp, err := c.Requestor.PostJSON(c.APICredentials.BearerToken, req)
 	if err != nil {
-		return nil, err
+		return Status{}, err
 	}
 
 	if spe, ok := e.(StatusProvidingEntity); ok {
 		status, err := spe.StatusFromResponse(resp)
 		if err != nil {
-			return nil, err
+			return Status{}, err
 		}
 
 		return status, nil
 	}
 
 	json.Unmarshal(resp, &e)
-	return &Status{Status: successfulStatus}, nil
+	return Status{Status: successfulStatus}, nil
 }

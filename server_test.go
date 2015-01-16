@@ -119,7 +119,7 @@ func TestSuccessfulStatusFromResponse(t *testing.T) {
 func TestErroredMissingStatusLinkStatusFromResponse(t *testing.T) {
 	srv := Server{}
 	s, err := srv.StatusFromResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
-	assert.Nil(t, s)
+	assert.Equal(t, Status{}, s)
 	assert.EqualError(t, err, "The creation response has no status link")
 }
 

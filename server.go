@@ -113,26 +113,26 @@ func (s *Server) RequestForSave(a string) (request, error) {
 	return request{URL: url, Parameters: *s}, nil
 }
 
-func (s *Server) StatusFromResponse(r []byte) (*Status, error) {
+func (s *Server) StatusFromResponse(r []byte) (Status, error) {
 	scr := serverCreationResponse{}
 	err := json.Unmarshal(r, &scr)
 	if err != nil {
-		return nil, err
+		return Status{}, err
 	}
 
 	sl, err := typeFromLinks("status", scr.Links)
 	if err != nil {
-		return nil, errors.New("The creation response has no status link")
+		return Status{}, errors.New("The creation response has no status link")
 	}
 
 	il, err := typeFromLinks("self", scr.Links)
 	if err != nil {
-		return nil, errors.New("The creation response has no self link")
+		return Status{}, errors.New("The creation response has no self link")
 	}
 
 	s.uuidURI = il.HRef
 
-	return &Status{URI: sl.HRef}, nil
+	return Status{URI: sl.HRef}, nil
 }
 
 func (c Credentials) URL(a string) (string, error) {
@@ -153,12 +153,12 @@ func (i PublicIPAddress) RequestForSave(a string) (request, error) {
 	return request{URL: url, Parameters: i}, nil
 }
 
-func (i PublicIPAddress) StatusFromResponse(r []byte) (*Status, error) {
+func (i PublicIPAddress) StatusFromResponse(r []byte) (Status, error) {
 	l := Link{}
 	err := json.Unmarshal(r, &l)
 	if err != nil {
-		return nil, err
+		return Status{}, err
 	}
 
-	return &Status{URI: l.HRef}, nil
+	return Status{URI: l.HRef}, nil
 }

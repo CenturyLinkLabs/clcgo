@@ -15,7 +15,7 @@ type testSavable struct {
 }
 
 type testStatusProviding struct {
-	CallbackForStatus func([]byte) (*Status, error)
+	CallbackForStatus func([]byte) (Status, error)
 }
 
 type savableCreationParameters struct {
@@ -40,7 +40,7 @@ func (s testStatusProviding) RequestForSave(a string) (request, error) {
 	}, nil
 }
 
-func (s testStatusProviding) StatusFromResponse(r []byte) (*Status, error) {
+func (s testStatusProviding) StatusFromResponse(r []byte) (Status, error) {
 	return s.CallbackForStatus(r)
 }
 
@@ -73,9 +73,9 @@ func TestSuccessfulStatusProvidingSaveEntity(t *testing.T) {
 	r := newTestRequestor()
 	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
 	c := Client{Requestor: r, APICredentials: cr}
-	st := &Status{}
+	st := Status{}
 	s := testStatusProviding{
-		CallbackForStatus: func(r []byte) (*Status, error) {
+		CallbackForStatus: func(r []byte) (Status, error) {
 			assert.Equal(t, []byte(creationResponse), r)
 			return st, nil
 		},
@@ -101,7 +101,7 @@ func TestErroredRequestSaveEntity(t *testing.T) {
 	}
 
 	status, err := c.SaveEntity(&s)
-	assert.Nil(t, status)
+	assert.Equal(t, Status{}, status)
 	assert.EqualError(t, err, "Test Request Error")
 }
 
@@ -116,7 +116,7 @@ func TestErroredPostJSONSaveEntity(t *testing.T) {
 	})
 
 	status, err := c.SaveEntity(&s)
-	assert.Nil(t, status)
+	assert.Equal(t, Status{}, status)
 	assert.EqualError(t, err, "Error from PostJSON")
 }
 
@@ -125,8 +125,8 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 	cr := APICredentials{BearerToken: "token", AccountAlias: "AA"}
 	c := Client{Requestor: r, APICredentials: cr}
 	s := testStatusProviding{
-		CallbackForStatus: func(r []byte) (*Status, error) {
-			return nil, errors.New("Test Status Error")
+		CallbackForStatus: func(r []byte) (Status, error) {
+			return Status{}, errors.New("Test Status Error")
 		},
 	}
 
@@ -135,6 +135,6 @@ func TestErorredStatusSaveEntity(t *testing.T) {
 	})
 
 	status, err := c.SaveEntity(&s)
-	assert.Nil(t, status)
+	assert.Equal(t, Status{}, status)
 	assert.EqualError(t, err, "Test Status Error")
 }

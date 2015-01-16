@@ -121,7 +121,7 @@ func ExampleClient_SaveEntity_successful() {
 	// Refresh the Status until it has completed. In your code you should put a
 	// delay between requests, as this can take a while.
 	if !st.HasSucceeded() {
-		c.GetEntity(st)
+		c.GetEntity(&st)
 	}
 
 	// The Status says that the server is provisioned. You can now request its

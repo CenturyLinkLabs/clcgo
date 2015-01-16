@@ -20,5 +20,5 @@ type SavableEntity interface {
 // All StatusProvidingEntites must be SavableEntities, but not every
 // SavableEntity is a StatusProvidingEntity.
 type StatusProvidingEntity interface {
-	StatusFromResponse([]byte) (*Status, error)
+	StatusFromResponse([]byte) (Status, error)
 }
