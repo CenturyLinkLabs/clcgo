@@ -74,8 +74,9 @@ type serverCreationResponse struct {
 // You must supply a slice of Port objects that will make the specified ports
 // accessible at the address.
 type PublicIPAddress struct {
-	Server Server
-	Ports  []Port `json:"ports"`
+	Server            Server
+	Ports             []Port `json:"ports"`
+	InternalIPAddress string `json:"internalIPAddress"`
 }
 
 // A Port object specifies a network port that should be made available on a
