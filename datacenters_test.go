@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWorkingDataCentersURL(t *testing.T) {
+func TestSuccessfulDataCentersURL(t *testing.T) {
 	d := DataCenters{}
 	u, err := d.URL("AA")
 
@@ -29,7 +29,7 @@ func TestDataCenterJSONUnmarshalling(t *testing.T) {
 	assert.Equal(t, "bar", dc.Name)
 }
 
-func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
+func TestSuccessfulDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{DataCenter: DataCenter{ID: "abc123"}}
 	u, err := d.URL("AA")
 
@@ -39,7 +39,8 @@ func TestWorkingDataCenterCapabilitiesURL(t *testing.T) {
 
 func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{}
-	_, err := d.URL("AA")
+	s, err := d.URL("AA")
+	assert.Equal(t, "", s)
 	assert.EqualError(t, err, "Need a DataCenter with an ID")
 }
 
@@ -59,7 +60,7 @@ func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
 	}
 }
 
-func TestWorkingDataCenterGroupURL(t *testing.T) {
+func TestSuccessfulDataCenterGroupURL(t *testing.T) {
 	d := DataCenterGroup{DataCenter: DataCenter{ID: "abc123"}}
 	u, err := d.URL("AA")
 
