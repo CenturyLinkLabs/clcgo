@@ -91,16 +91,33 @@ const (
 	}`
 
 	DataCenterCapabilitiesResponse = `{
-	"deployableNetworks":[
-		{
-			"name":"Test Network",
-			"networkId":"id-for-network",
-			"type":"private",
-			"accountID":"ACME"
-		}
-	],
+		"deployableNetworks":[
+			{
+				"name":"Test Network",
+				"networkId":"id-for-network",
+				"type":"private",
+				"accountID":"ACME"
+			}
+		],
 		"templates": [
 			{ "name": "Name", "description": "Description" }
+		]
+	}`
+
+	DataCenterGroupResponse = `{
+		"id": "IL1",
+		"name": "Illinois 1",
+		"links": [
+			{
+				 "rel": "self",
+				 "href": "/v2/datacenters/ACME/IL1"
+			},
+			{
+				 "rel": "group",
+				 "href": "/v2/groups/ACME/group-id",
+				 "id": "group-id",
+				 "name": "IL1 Hardware"
+			}
 		]
 	}`
 )

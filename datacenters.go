@@ -7,6 +7,7 @@ import (
 
 const (
 	dataCentersURL            = apiRoot + "/datacenters/%s"
+	dataCenterGroupURL        = dataCentersURL + "/%s?groupLinks=true"
 	dataCenterCapabilitiesURL = dataCentersURL + "/%s/deploymentCapabilities"
 )
 
@@ -21,6 +22,18 @@ type DataCenters []DataCenter
 type DataCenter struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+// DataCenterGroup can be used to find associated groups for a datacenter and
+// your account. The linked hardware group can be used with the Group object to
+// query for your account's groups within that datacenter.
+//
+// You must supply the associated DataCenter object.
+type DataCenterGroup struct {
+	DataCenter DataCenter `json:"-"`
+	ID         string     `json:"id"`
+	Name       string     `json:"name"`
+	Links      []Link     `json:"links"`
 }
 
 // DataCenterCapabilities gets more information about a specific DataCenter.
@@ -54,4 +67,12 @@ func (d DataCenterCapabilities) URL(a string) (string, error) {
 	}
 
 	return fmt.Sprintf(dataCenterCapabilitiesURL, a, d.DataCenter.ID), nil
+}
+
+func (d DataCenterGroup) URL(a string) (string, error) {
+	if d.DataCenter.ID == "" {
+		return "", errors.New("Need a DataCenter with an ID")
+	}
+
+	return fmt.Sprintf(dataCenterGroupURL, a, d.DataCenter.ID), nil
 }

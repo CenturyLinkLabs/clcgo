@@ -58,3 +58,27 @@ func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
 		assert.Equal(t, "id-for-network", d.DeployableNetworks[0].NetworkID)
 	}
 }
+
+func TestWorkingDataCenterGroupURL(t *testing.T) {
+	d := DataCenterGroup{DataCenter: DataCenter{ID: "abc123"}}
+	u, err := d.URL("AA")
+
+	assert.NoError(t, err)
+	assert.Equal(t, apiRoot+"/datacenters/AA/abc123?groupLinks=true", u)
+}
+
+func TestErroredDataCenterGroupURL(t *testing.T) {
+	d := DataCenterGroup{}
+	_, err := d.URL("AA")
+	assert.EqualError(t, err, "Need a DataCenter with an ID")
+}
+
+func TestSuccessfulDataCenterGroupUnmarshalling(t *testing.T) {
+	d := DataCenterGroup{}
+	err := json.Unmarshal([]byte(fakeapi.DataCenterGroupResponse), &d)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "IL1", d.ID)
+	assert.Equal(t, "Illinois 1", d.Name)
+	assert.Len(t, d.Links, 2)
+}
