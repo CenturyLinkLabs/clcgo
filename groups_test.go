@@ -35,3 +35,28 @@ func TestGroupUnmarshalling(t *testing.T) {
 		assert.Equal(t, "test-child-id", g.Groups[0].ID)
 	}
 }
+
+func TestSuccessfulGroupRequestForSave(t *testing.T) {
+	p := Group{ID: "parent-group-id"}
+	g := Group{
+		Name:        "Test Group",
+		Description: "Description",
+		ParentGroup: &p,
+	}
+	req, err := g.RequestForSave("AA")
+
+	assert.NoError(t, err)
+	assert.Equal(t, apiRoot+"/groups/AA", req.URL)
+	assert.Equal(t, g, req.Parameters)
+	rg, ok := req.Parameters.(Group)
+	if assert.True(t, ok) {
+		assert.Equal(t, "parent-group-id", rg.ParentGroupID)
+	}
+}
+
+func TestErroredGroupRequestForSave(t *testing.T) {
+	g := Group{Name: "Test Group"}
+	req, err := g.RequestForSave("AA")
+	assert.Equal(t, request{}, req)
+	assert.EqualError(t, err, "A ParentGroup with an ID is required to create a group")
+}
