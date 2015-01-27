@@ -120,4 +120,18 @@ const (
 			}
 		]
 	}`
+
+	GroupResponse = `{
+		"id": "test-id",
+		"name": "Test Group",
+		"type": "archive",
+		"groups": [
+			{
+				"id": "test-child-id",
+				"name": "Nested Group",
+				"type": "default",
+				"groups": []
+			}
+		]
+	}`
 )
