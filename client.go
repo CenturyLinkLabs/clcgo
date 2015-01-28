@@ -131,6 +131,11 @@ func (c *Client) SaveEntity(e SavableEntity) (Status, error) {
 	return Status{Status: successfulStatus}, nil
 }
 
+// DeleteEntity is used to tell CenturyLink Cloud to remove a resource.
+//
+// The method returns a Status, which can be used as described in the
+// SaveEntity documentation to determine when the work completes. The Entity
+// object will not be modified.
 func (c *Client) DeleteEntity(e Entity) (Status, error) {
 	url, err := e.URL(c.APICredentials.AccountAlias)
 	if err != nil {

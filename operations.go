@@ -6,8 +6,12 @@ import (
 	"fmt"
 )
 
+// An OperationType should be used in conjunction with a ServerOperation to
+// instruct a server instance to perform one of several operations.
 type OperationType string
 
+// More information on precisely what each operation does can be found in the
+// CenturyLink Cloud V2 API documentation.
 const (
 	PauseServer    OperationType = "pause"
 	ShutDownServer OperationType = "shutDown"
@@ -17,6 +21,12 @@ const (
 	PowerOffServer OperationType = "powerOff"
 )
 
+// A ServerOperation is used to perform many tasks around
+// starting/stopping/pausing server instances.
+//
+// You are required to pass both a Server reference and an OperationType, and
+// you will be notified of the operation's progress via the Status that
+// is returned when the ServerOperation is passed to SaveEntity.
 type ServerOperation struct {
 	OperationType OperationType
 	Server        Server
