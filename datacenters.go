@@ -63,7 +63,7 @@ func (d DataCenters) URL(a string) (string, error) {
 
 func (d DataCenterCapabilities) URL(a string) (string, error) {
 	if d.DataCenter.ID == "" {
-		return "", errors.New("Need a DataCenter with an ID")
+		return "", errors.New("need a DataCenter with an ID")
 	}
 
 	return fmt.Sprintf(dataCenterCapabilitiesURL, a, d.DataCenter.ID), nil
@@ -71,7 +71,7 @@ func (d DataCenterCapabilities) URL(a string) (string, error) {
 
 func (d DataCenterGroup) URL(a string) (string, error) {
 	if d.DataCenter.ID == "" {
-		return "", errors.New("Need a DataCenter with an ID")
+		return "", errors.New("need a DataCenter with an ID")
 	}
 
 	return fmt.Sprintf(dataCenterGroupURL, a, d.DataCenter.ID), nil

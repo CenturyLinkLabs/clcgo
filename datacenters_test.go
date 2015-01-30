@@ -41,7 +41,7 @@ func TestErroredDataCenterCapabilitiesURL(t *testing.T) {
 	d := DataCenterCapabilities{}
 	s, err := d.URL("AA")
 	assert.Equal(t, "", s)
-	assert.EqualError(t, err, "Need a DataCenter with an ID")
+	assert.EqualError(t, err, "need a DataCenter with an ID")
 }
 
 func TestSuccessfulDataCenterCapabilitiesUnmarshalling(t *testing.T) {
@@ -71,7 +71,7 @@ func TestSuccessfulDataCenterGroupURL(t *testing.T) {
 func TestErroredDataCenterGroupURL(t *testing.T) {
 	d := DataCenterGroup{}
 	_, err := d.URL("AA")
-	assert.EqualError(t, err, "Need a DataCenter with an ID")
+	assert.EqualError(t, err, "need a DataCenter with an ID")
 }
 
 func TestSuccessfulDataCenterGroupUnmarshalling(t *testing.T) {

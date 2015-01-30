@@ -20,7 +20,7 @@ func TestErroredGroupURL(t *testing.T) {
 	g := Group{}
 	s, err := g.URL("AA")
 	assert.Equal(t, "", s)
-	assert.EqualError(t, err, "An ID field is required to get a group")
+	assert.EqualError(t, err, "an ID field is required to get a group")
 }
 
 func TestGroupUnmarshalling(t *testing.T) {
@@ -58,5 +58,5 @@ func TestErroredGroupRequestForSave(t *testing.T) {
 	g := Group{Name: "Test Group"}
 	req, err := g.RequestForSave("AA")
 	assert.Equal(t, request{}, req)
-	assert.EqualError(t, err, "A ParentGroup with an ID is required to create a group")
+	assert.EqualError(t, err, "a ParentGroup with an ID is required to create a group")
 }

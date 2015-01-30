@@ -43,7 +43,7 @@ const (
 
 func (p ServerOperation) RequestForSave(a string) (request, error) {
 	if p.Server.ID == "" || p.OperationType == "" {
-		return request{}, errors.New("ServerOperation requires a Server and OperationType")
+		return request{}, errors.New("a ServerOperation requires a Server and OperationType")
 	}
 
 	r := request{
@@ -68,13 +68,13 @@ func (p ServerOperation) StatusFromCreateResponse(r []byte) (Status, error) {
 	// shouldn't based on us only submitting one server a time, but just in case.
 	// I'd rather error than ignore or panic.
 	if len(ors) != 1 {
-		return Status{}, errors.New("Expected a single operation response from the API!")
+		return Status{}, errors.New("expected a single operation response from the API!")
 	}
 	or := ors[0]
 
 	sl, err := typeFromLinks("status", or.Links)
 	if err != nil {
-		return Status{}, errors.New("The operation response has no status link")
+		return Status{}, errors.New("the operation response has no status link")
 	}
 
 	return Status{URI: sl.HRef}, nil

@@ -82,7 +82,7 @@ func TestUnauthorizedPostJSON(t *testing.T) {
 	_, err := r.PostJSON("token", req)
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Your bearer token was rejected")
+		assert.EqualError(t, reqErr, "your bearer token was rejected")
 		assert.Equal(t, 401, reqErr.StatusCode)
 	}
 }
@@ -100,7 +100,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code '418'")
+		assert.EqualError(t, reqErr, "got an unexpected status code '418'")
 		assert.Equal(t, 418, reqErr.StatusCode)
 	}
 }
@@ -117,7 +117,7 @@ func Test400WithMessagesOnPostJSON(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "The request is invalid.")
+		assert.EqualError(t, reqErr, "the request is invalid.")
 		assert.Equal(t, 400, reqErr.StatusCode)
 		if assert.Len(t, reqErr.Errors, 2) {
 			assert.Equal(t, "The name field is required.", reqErr.Errors["body.name"][0])
@@ -155,7 +155,7 @@ func TestUnauthorizedGetJSON(t *testing.T) {
 	_, err := r.GetJSON("token", request{URL: ts.URL})
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Your bearer token was rejected")
+		assert.EqualError(t, reqErr, "your bearer token was rejected")
 		assert.Equal(t, 401, reqErr.StatusCode)
 	}
 }
@@ -172,7 +172,7 @@ func TestErrored400GetJson(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code '400'")
+		assert.EqualError(t, reqErr, "got an unexpected status code '400'")
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
 }
@@ -208,7 +208,7 @@ func TestUnauthorizedDeleteJSON(t *testing.T) {
 	_, err := r.DeleteJSON("token", req)
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Your bearer token was rejected")
+		assert.EqualError(t, reqErr, "your bearer token was rejected")
 		assert.Equal(t, 401, reqErr.StatusCode)
 	}
 }
@@ -225,7 +225,7 @@ func TestErrored400DeleteJSON(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code '400'")
+		assert.EqualError(t, reqErr, "got an unexpected status code '400'")
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
 }
@@ -239,6 +239,6 @@ func TestTypeFromLinks(t *testing.T) {
 	assert.Equal(t, l, found)
 
 	found, err = typeFromLinks("bad", ls)
-	assert.EqualError(t, err, "No link of type 'bad'")
+	assert.EqualError(t, err, "no link of type 'bad'")
 	assert.Equal(t, Link{}, found)
 }

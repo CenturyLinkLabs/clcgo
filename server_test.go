@@ -79,7 +79,7 @@ func TestSuccessfulServerURL(t *testing.T) {
 func TestErroredServerURL(t *testing.T) {
 	u, err := Server{}.URL("AA")
 
-	assert.EqualError(t, err, "An ID field is required to get a server")
+	assert.EqualError(t, err, "an ID field is required to get a server")
 	assert.Empty(t, u)
 }
 
@@ -120,7 +120,7 @@ func TestErroredMissingStatusLinkStatusFromCreateResponse(t *testing.T) {
 	srv := Server{}
 	s, err := srv.StatusFromCreateResponse([]byte(fakeapi.ServerCreationMissingStatusResponse))
 	assert.Equal(t, Status{}, s)
-	assert.EqualError(t, err, "The creation response has no status link")
+	assert.EqualError(t, err, "the creation response has no status link")
 }
 
 func TestSuccessfulIPAddressRequestForSave(t *testing.T) {
@@ -140,7 +140,7 @@ func TestErroredIPAddressRequestForSave(t *testing.T) {
 	req, err := i.RequestForSave("AA")
 
 	assert.Equal(t, request{}, req)
-	assert.EqualError(t, err, "A Server with an ID is required to add a Public IP Address")
+	assert.EqualError(t, err, "a Server with an ID is required to add a Public IP Address")
 }
 
 func TestIPAddressStatusFromCreateResponse(t *testing.T) {
@@ -173,6 +173,6 @@ func TestErroredCredentialsURL(t *testing.T) {
 	c.Server = Server{ID: ""}
 
 	u, err := c.URL("AA")
-	assert.EqualError(t, err, "A Server with an ID is required to fetch credentials")
+	assert.EqualError(t, err, "a Server with an ID is required to fetch credentials")
 	assert.Empty(t, u)
 }

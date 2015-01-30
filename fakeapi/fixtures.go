@@ -63,7 +63,7 @@ const (
 	}`
 
 	ServerCreationInvalidResponse = `{
-		"message": "The request is invalid.",
+		"message": "the request is invalid.",
 		"modelState": {
 			"body.name": ["The name field is required."],
 			"body.sourceServerId":["The sourceServerId field is required."]

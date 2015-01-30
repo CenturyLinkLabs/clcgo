@@ -30,11 +30,11 @@ func TestErroredGetAPICredentials(t *testing.T) {
 	c := Client{Requestor: r}
 
 	r.registerHandler("POST", authenticationURL, func(token string, req request) (string, error) {
-		err := RequestError{Message: "There was a problem with the request", StatusCode: 400}
+		err := RequestError{Message: "there was a problem with the request", StatusCode: 400}
 		return "Bad Request", err
 	})
 
 	err := c.GetAPICredentials("username", "password")
-	assert.EqualError(t, err, "There was a problem with your credentials")
+	assert.EqualError(t, err, "there was a problem with your credentials")
 	assert.Empty(t, c.APICredentials.BearerToken)
 }

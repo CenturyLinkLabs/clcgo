@@ -50,12 +50,12 @@ func TestErroredURLInGetEntity(t *testing.T) {
 	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{
 		CallbackForURL: func(a string) (string, error) {
-			return "", errors.New("Test URL Error")
+			return "", errors.New("test URL Error")
 		},
 	}
 
 	err := c.GetEntity(&e)
-	assert.EqualError(t, err, "Test URL Error")
+	assert.EqualError(t, err, "test URL Error")
 }
 
 func TestErroredInGetJSONInGetEntity(t *testing.T) {
@@ -64,11 +64,11 @@ func TestErroredInGetJSONInGetEntity(t *testing.T) {
 	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{}
 	r.registerHandler("GET", "/entity/url", func(token string, req request) (string, error) {
-		return "", errors.New("Error from GetJSON")
+		return "", errors.New("error from GetJSON")
 	})
 
 	err := c.GetEntity(&e)
-	assert.EqualError(t, err, "Error from GetJSON")
+	assert.EqualError(t, err, "error from GetJSON")
 }
 
 func TestBadJSONInGetJSONInGetEntity(t *testing.T) {

@@ -57,7 +57,7 @@ func (c *Client) GetAPICredentials(u string, p string) error {
 	_, err := c.SaveEntity(&c.APICredentials)
 	if err != nil {
 		if rerr, ok := err.(RequestError); ok && rerr.StatusCode == 400 {
-			err = errors.New("There was a problem with your credentials")
+			err = errors.New("there was a problem with your credentials")
 		}
 
 		return err

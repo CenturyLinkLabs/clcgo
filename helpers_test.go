@@ -43,5 +43,5 @@ func (r testRequestor) responseForMethod(m string, t string, req request) ([]byt
 		return []byte(s), err
 	}
 
-	return nil, fmt.Errorf("There is no handler for %s '%s'", m, req.URL)
+	return nil, fmt.Errorf("there is no handler for %s '%s'", m, req.URL)
 }

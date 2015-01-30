@@ -65,7 +65,7 @@ func ExampleClient_GetAPICredentials_failed() {
 
 	fmt.Printf("Error: %s", err)
 	// Output:
-	// Error: There was a problem with your credentials
+	// Error: there was a problem with your credentials
 }
 
 func ExampleClient_GetEntity_successful() {
@@ -100,7 +100,7 @@ func ExampleClient_GetEntity_expiredToken() {
 	rerr, _ := err.(clcgo.RequestError)
 	fmt.Printf("Error: %s, Status Code: %d", rerr, rerr.StatusCode)
 	// Output:
-	// Error: Your bearer token was rejected, Status Code: 401
+	// Error: your bearer token was rejected, Status Code: 401
 }
 
 func ExampleClient_SaveEntity_successful() {

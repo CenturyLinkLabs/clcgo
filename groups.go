@@ -29,7 +29,7 @@ type Group struct {
 
 func (g *Group) URL(a string) (string, error) {
 	if g.ID == "" {
-		return "", errors.New("An ID field is required to get a group")
+		return "", errors.New("an ID field is required to get a group")
 	}
 
 	return fmt.Sprintf(groupURL, a, g.ID), nil
@@ -37,7 +37,7 @@ func (g *Group) URL(a string) (string, error) {
 
 func (g *Group) RequestForSave(a string) (request, error) {
 	if g.ParentGroup == nil || g.ParentGroup.ID == "" {
-		return request{}, errors.New("A ParentGroup with an ID is required to create a group")
+		return request{}, errors.New("a ParentGroup with an ID is required to create a group")
 	}
 
 	url := fmt.Sprintf(groupsURL, a)

@@ -27,14 +27,14 @@ func TestErroredServerOperationRequestForSave(t *testing.T) {
 	req, err := p.RequestForSave("AA")
 
 	assert.Equal(t, request{}, req)
-	assert.EqualError(t, err, "ServerOperation requires a Server and OperationType")
+	assert.EqualError(t, err, "a ServerOperation requires a Server and OperationType")
 
 	s := Server{ID: "test-id"}
 	p = ServerOperation{Server: s}
 	req, err = p.RequestForSave("AA")
 
 	assert.Equal(t, request{}, req)
-	assert.EqualError(t, err, "ServerOperation requires a Server and OperationType")
+	assert.EqualError(t, err, "a ServerOperation requires a Server and OperationType")
 }
 
 func TestServerOperationStatusFromCreateResponse(t *testing.T) {

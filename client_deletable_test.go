@@ -74,12 +74,12 @@ func TestErroredURLDeleteEntity(t *testing.T) {
 	c := Client{Requestor: r, APICredentials: cr}
 	e := testEntity{
 		CallbackForURL: func(a string) (string, error) {
-			return "", errors.New("Test URL Error")
+			return "", errors.New("test URL Error")
 		},
 	}
 
 	status, err := c.DeleteEntity(&e)
-	assert.EqualError(t, err, "Test URL Error")
+	assert.EqualError(t, err, "test URL Error")
 	assert.Equal(t, Status{}, status)
 }
 
@@ -90,11 +90,11 @@ func TestErroredDeleteJSONDeleteEntity(t *testing.T) {
 	e := testEntity{}
 
 	r.registerHandler("DELETE", "/entity/url", func(token string, req request) (string, error) {
-		return "", errors.New("Test DeleteJSON Error")
+		return "", errors.New("test DeleteJSON Error")
 	})
 
 	status, err := c.DeleteEntity(&e)
-	assert.EqualError(t, err, "Test DeleteJSON Error")
+	assert.EqualError(t, err, "test DeleteJSON Error")
 	assert.Equal(t, Status{}, status)
 }
 
@@ -104,7 +104,7 @@ func TestDeletionStatusProvidingEntityDeleteEntity(t *testing.T) {
 	c := Client{Requestor: r, APICredentials: cr}
 	e := testDeletionStatusProviding{
 		CallbackForStatus: func(r []byte) (Status, error) {
-			return Status{}, errors.New("Test StatusFromDeleteResponse Error")
+			return Status{}, errors.New("test StatusFromDeleteResponse Error")
 		},
 	}
 
@@ -113,6 +113,6 @@ func TestDeletionStatusProvidingEntityDeleteEntity(t *testing.T) {
 	})
 
 	status, err := c.DeleteEntity(&e)
-	assert.EqualError(t, err, "Test StatusFromDeleteResponse Error")
+	assert.EqualError(t, err, "test StatusFromDeleteResponse Error")
 	assert.Equal(t, Status{}, status)
 }

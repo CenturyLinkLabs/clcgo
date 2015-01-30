@@ -100,7 +100,7 @@ func (s Server) IsPaused() bool {
 
 func (s Server) URL(a string) (string, error) {
 	if s.ID == "" && s.uuidURI == "" {
-		return "", errors.New("An ID field is required to get a server")
+		return "", errors.New("an ID field is required to get a server")
 	} else if s.uuidURI != "" {
 		return apiDomain + s.uuidURI, nil
 	}
@@ -123,12 +123,12 @@ func (s *Server) StatusFromCreateResponse(r []byte) (Status, error) {
 
 	sl, err := typeFromLinks("status", scr.Links)
 	if err != nil {
-		return Status{}, errors.New("The creation response has no status link")
+		return Status{}, errors.New("the creation response has no status link")
 	}
 
 	il, err := typeFromLinks("self", scr.Links)
 	if err != nil {
-		return Status{}, errors.New("The creation response has no self link")
+		return Status{}, errors.New("the creation response has no self link")
 	}
 
 	s.uuidURI = il.HRef
@@ -138,7 +138,7 @@ func (s *Server) StatusFromCreateResponse(r []byte) (Status, error) {
 
 func (c Credentials) URL(a string) (string, error) {
 	if c.Server.ID == "" {
-		return "", errors.New("A Server with an ID is required to fetch credentials")
+		return "", errors.New("a Server with an ID is required to fetch credentials")
 	}
 
 	url := fmt.Sprintf("%s/servers/%s/%s/credentials", apiRoot, a, c.Server.ID)
@@ -147,7 +147,7 @@ func (c Credentials) URL(a string) (string, error) {
 
 func (i PublicIPAddress) RequestForSave(a string) (request, error) {
 	if i.Server.ID == "" {
-		return request{}, errors.New("A Server with an ID is required to add a Public IP Address")
+		return request{}, errors.New("a Server with an ID is required to add a Public IP Address")
 	}
 
 	url := fmt.Sprintf(publicIPAddressURL, a, i.Server.ID)
