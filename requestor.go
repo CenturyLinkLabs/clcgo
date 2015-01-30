@@ -63,7 +63,7 @@ func (r clcRequestor) PostJSON(t string, req request) ([]byte, error) {
 	case 401:
 		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
+		return body, RequestError{Message: fmt.Sprintf("Got an unexpected status code '%d'", code), StatusCode: code}
 	}
 }
 
@@ -79,7 +79,7 @@ func (r clcRequestor) GetJSON(t string, req request) ([]byte, error) {
 	case 401:
 		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
+		return body, RequestError{Message: fmt.Sprintf("Got an unexpected status code '%d'", code), StatusCode: code}
 	}
 }
 
@@ -95,7 +95,7 @@ func (r clcRequestor) DeleteJSON(t string, req request) ([]byte, error) {
 	case 401:
 		return body, RequestError{Message: "Your bearer token was rejected", StatusCode: 401}
 	default:
-		return body, RequestError{Message: "Got an unexpected status code", StatusCode: code}
+		return body, RequestError{Message: fmt.Sprintf("Got an unexpected status code '%d'", code), StatusCode: code}
 	}
 }
 

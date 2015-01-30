@@ -100,7 +100,7 @@ func TestUnhandledStatusOnPostJSON(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code")
+		assert.EqualError(t, reqErr, "Got an unexpected status code '418'")
 		assert.Equal(t, 418, reqErr.StatusCode)
 	}
 }
@@ -172,7 +172,7 @@ func TestErrored400GetJson(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code")
+		assert.EqualError(t, reqErr, "Got an unexpected status code '400'")
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
 }
@@ -225,7 +225,7 @@ func TestErrored400DeleteJSON(t *testing.T) {
 
 	reqErr, ok := err.(RequestError)
 	if assert.True(t, ok) {
-		assert.EqualError(t, reqErr, "Got an unexpected status code")
+		assert.EqualError(t, reqErr, "Got an unexpected status code '400'")
 		assert.Equal(t, 400, reqErr.StatusCode)
 	}
 }
