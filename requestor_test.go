@@ -57,9 +57,9 @@ func TestSuccessfulAuthenticatedPostJSON(t *testing.T) {
 
 func TestSuccessfulPassingArrayToPostJSON(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s, err := ioutil.ReadAll(r.Body)
+		b, err := ioutil.ReadAll(r.Body)
 		assert.NoError(t, err)
-		assert.Equal(t, `["first","second"]`, s)
+		assert.Equal(t, `["first","second"]`, string(b))
 
 		fmt.Fprintf(w, "Response Text")
 	}))
