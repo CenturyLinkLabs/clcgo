@@ -32,4 +32,4 @@ and CreationStatusProvidingEntity interfaces. Implementing one or more of those
 interfaces, depending on the resource, will allow you to write your own
 resources and interact with them in the standard fashion.
 */
-package clcgo
+package clcgo // import "github.com/CenturyLinkLabs/clcgo"
