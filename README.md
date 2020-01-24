@@ -1,4 +1,8 @@
 # clcgo
+## NOTE
+
+This repo is no longer being maintained. Users are welcome to fork it, but we make no warranty of its functionality.
+
 
 [![Circle CI](https://circleci.com/gh/CenturyLinkLabs/clcgo/tree/master.svg?style=svg)](https://circleci.com/gh/CenturyLinkLabs/clcgo/tree/master)
 [![GoDoc](http://godoc.org/github.com/CenturyLinkLabs/clcgo?status.png)](http://godoc.org/github.com/CenturyLinkLabs/clcgo)
